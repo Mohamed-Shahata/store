@@ -1,0 +1,124 @@
+{
+  "metadata": {
+    "defaultDescription": "Premium online store with the best products.",
+    "productsDescription": "Browse our complete collection of premium products.",
+    "cartDescription": "Review your cart and place your order via WhatsApp.",
+    "productNotFound": "Product Not Found"
+  },
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "cart": "Cart",
+    "search": "Search",
+    "searchPlaceholder": "Search products...",
+    "menu": "Menu",
+    "premiumStore": "Premium Store"
+  },
+  "hero": {
+    "badge": "Premium Quality Products",
+    "welcome": "Welcome to {storeName}",
+    "defaultDescription": "Discover our curated collection of premium products. Shop the latest trends with exclusive deals.",
+    "shopNow": "Shop Now",
+    "newArrivals": "New Arrivals"
+  },
+  "home": {
+    "featuredProducts": "Featured Products",
+    "newArrivals": "New Arrivals",
+    "bestSellers": "Best Sellers",
+    "viewAll": "View All",
+    "shopByCategory": "Shop by Category",
+    "limitedOffers": "Limited Time Offers",
+    "promoDescription": "Shop now and save on selected items. Order via WhatsApp for fast delivery!"
+  },
+  "products": {
+    "title": "All Products",
+    "subtitle": "Discover our complete collection",
+    "noProducts": "No products found",
+    "noProductsHint": "Try adjusting your filters or search query.",
+    "filters": "Filters",
+    "search": "Search",
+    "searchPlaceholder": "Search products...",
+    "category": "Category",
+    "allCategories": "All Categories",
+    "priceRange": "Price Range (EGP)",
+    "min": "Min",
+    "max": "Max",
+    "applyPrice": "Apply Price",
+    "sortBy": "Sort By",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "sortPriceAsc": "Price: Low to High",
+    "sortPriceDesc": "Price: High to Low",
+    "sortPopular": "Most Popular",
+    "clearFilters": "Clear Filters",
+    "noImage": "No Image",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to cart",
+    "relatedProducts": "Related Products"
+  },
+  "product": {
+    "inStock": "In Stock ({count} available)",
+    "outOfStock": "Out of Stock",
+    "addToCart": "Add to Cart"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "emptyTitle": "Your cart is empty",
+    "emptyDescription": "Browse our products and add items to your cart.",
+    "continueShopping": "Continue Shopping",
+    "orderSummary": "Order Summary",
+    "total": "Total",
+    "savingMessage": "You're saving with applied discounts!",
+    "yourName": "Your Name",
+    "namePlaceholder": "Enter your name",
+    "yourPhone": "Your Phone",
+    "phonePlaceholder": "01xxxxxxxxx",
+    "orderWhatsApp": "Order Now via WhatsApp",
+    "whatsappHint": "You'll be redirected to WhatsApp to complete your order with {storeName}.",
+    "emptyError": "Your cart is empty",
+    "addedToCart": "Added to cart",
+    "redirecting": "Redirecting to WhatsApp..."
+  },
+  "footer": {
+    "defaultDescription": "Your one-stop shop for premium products.",
+    "quickLinks": "Quick Links",
+    "followUs": "Follow Us",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
+    "rights": "All rights reserved."
+  },
+  "common": {
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "pagination": "Pagination",
+    "off": "OFF",
+    "sale": "SALE"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved.",
+    "goHome": "Go Home"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "phoneRequired": "Valid phone number is required",
+    "phoneInvalid": "Invalid phone number"
+  },
+  "whatsapp": {
+    "greeting": "Hello,",
+    "orderIntro": "I would like to place an order.",
+    "products": "Products:",
+    "quantity": "Quantity",
+    "price": "Price",
+    "totalPrice": "Total Price",
+    "customerName": "Customer Name:",
+    "customerPhone": "Customer Phone:",
+    "thankYou": "Thank You."
+  },
+  "language": {
+    "switch": "Language",
+    "en": "English",
+    "ar": "العربية"
+  }
+}

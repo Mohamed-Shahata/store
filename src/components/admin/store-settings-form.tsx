@@ -1,0 +1,183 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { SingleImageUpload, ImageUpload } from "@/components/admin/image-upload";
+import {
+  storeSettingsSchema,
+  type StoreSettingsFormData,
+} from "@/lib/validations/schemas";
+import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+import type { StoreSettings } from "@/types/database";
+
+interface StoreSettingsFormProps {
+  settings: StoreSettings;
+}
+
+export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [logo, setLogo] = useState<string | null>(settings.logo);
+  const [banners, setBanners] = useState<string[]>(
+    Array.isArray(settings.banner_images)
+      ? (settings.banner_images as string[])
+      : []
+  );
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<StoreSettingsFormData>({
+    resolver: zodResolver(storeSettingsSchema),
+    defaultValues: {
+      store_name: settings.store_name,
+      store_description: settings.store_description ?? "",
+      whatsapp_number: settings.whatsapp_number,
+      facebook_url: settings.facebook_url ?? "",
+      instagram_url: settings.instagram_url ?? "",
+      tiktok_url: settings.tiktok_url ?? "",
+      seo_title: settings.seo_title ?? "",
+      seo_description: settings.seo_description ?? "",
+      seo_keywords: settings.seo_keywords ?? "",
+    },
+  });
+
+  const onSubmit = async (data: StoreSettingsFormData) => {
+    setLoading(true);
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from("store_settings")
+      .update({
+        ...data,
+        logo,
+        banner_images: banners,
+        facebook_url: data.facebook_url || null,
+        instagram_url: data.instagram_url || null,
+        tiktok_url: data.tiktok_url || null,
+      })
+      .eq("id", settings.id);
+
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+      return;
+    }
+
+    toast.success("Settings saved");
+    router.refresh();
+    setLoading(false);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Store Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="store_name">Store Name</Label>
+            <Input id="store_name" {...register("store_name")} />
+            {errors.store_name && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.store_name.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <Label htmlFor="store_description">Store Description</Label>
+            <Textarea id="store_description" rows={3} {...register("store_description")} />
+          </div>
+          <div>
+            <Label>Store Logo</Label>
+            <SingleImageUpload value={logo} onChange={setLogo} />
+          </div>
+          <div>
+            <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
+            <Input id="whatsapp_number" {...register("whatsapp_number")} />
+            {errors.whatsapp_number && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.whatsapp_number.message}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Social Links</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="facebook_url">Facebook URL</Label>
+            <Input id="facebook_url" {...register("facebook_url")} />
+          </div>
+          <div>
+            <Label htmlFor="instagram_url">Instagram URL</Label>
+            <Input id="instagram_url" {...register("instagram_url")} />
+          </div>
+          <div>
+            <Label htmlFor="tiktok_url">TikTok URL</Label>
+            <Input id="tiktok_url" {...register("tiktok_url")} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Banner Images</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ImageUpload
+            images={banners}
+            onChange={setBanners}
+            maxImages={4}
+            bucket="store-assets"
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>SEO Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="seo_title">SEO Title</Label>
+            <Input id="seo_title" {...register("seo_title")} />
+          </div>
+          <div>
+            <Label htmlFor="seo_description">SEO Description</Label>
+            <Textarea id="seo_description" rows={2} {...register("seo_description")} />
+          </div>
+          <div>
+            <Label htmlFor="seo_keywords">SEO Keywords (comma separated)</Label>
+            <Input id="seo_keywords" {...register("seo_keywords")} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Button type="submit" disabled={loading}>
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Save Settings
+      </Button>
+    </form>
+  );
+}

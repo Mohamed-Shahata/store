@@ -1,0 +1,124 @@
+{
+  "metadata": {
+    "defaultDescription": "متجر إلكتروني مميز بأفضل المنتجات.",
+    "productsDescription": "تصفح مجموعتنا الكاملة من المنتجات المميزة.",
+    "cartDescription": "راجع سلة التسوق واطلب عبر واتساب.",
+    "productNotFound": "المنتج غير موجود"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "products": "المنتجات",
+    "cart": "السلة",
+    "search": "بحث",
+    "searchPlaceholder": "ابحث عن منتجات...",
+    "menu": "القائمة",
+    "premiumStore": "متجر مميز"
+  },
+  "hero": {
+    "badge": "منتجات عالية الجودة",
+    "welcome": "مرحباً بك في {storeName}",
+    "defaultDescription": "اكتشف مجموعتنا المختارة من المنتجات المميزة. تسوق أحدث الصيحات بعروض حصرية.",
+    "shopNow": "تسوق الآن",
+    "newArrivals": "وصل حديثاً"
+  },
+  "home": {
+    "featuredProducts": "منتجات مميزة",
+    "newArrivals": "وصل حديثاً",
+    "bestSellers": "الأكثر مبيعاً",
+    "viewAll": "عرض الكل",
+    "shopByCategory": "تسوق حسب الفئة",
+    "limitedOffers": "عروض لفترة محدودة",
+    "promoDescription": "تسوق الآن ووفّر على منتجات مختارة. اطلب عبر واتساب للتوصيل السريع!"
+  },
+  "products": {
+    "title": "جميع المنتجات",
+    "subtitle": "اكتشف مجموعتنا الكاملة",
+    "noProducts": "لا توجد منتجات",
+    "noProductsHint": "جرّب تعديل الفلاتر أو كلمة البحث.",
+    "filters": "الفلاتر",
+    "search": "بحث",
+    "searchPlaceholder": "ابحث عن منتجات...",
+    "category": "الفئة",
+    "allCategories": "جميع الفئات",
+    "priceRange": "نطاق السعر (ج.م)",
+    "min": "الحد الأدنى",
+    "max": "الحد الأقصى",
+    "applyPrice": "تطبيق السعر",
+    "sortBy": "ترتيب حسب",
+    "sortNewest": "الأحدث",
+    "sortOldest": "الأقدم",
+    "sortPriceAsc": "السعر: من الأقل للأعلى",
+    "sortPriceDesc": "السعر: من الأعلى للأقل",
+    "sortPopular": "الأكثر شعبية",
+    "clearFilters": "مسح الفلاتر",
+    "noImage": "لا توجد صورة",
+    "outOfStock": "غير متوفر",
+    "addToCart": "أضف إلى السلة",
+    "relatedProducts": "منتجات ذات صلة"
+  },
+  "product": {
+    "inStock": "متوفر ({count} قطعة)",
+    "outOfStock": "غير متوفر",
+    "addToCart": "أضف إلى السلة"
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "emptyTitle": "سلتك فارغة",
+    "emptyDescription": "تصفح منتجاتنا وأضف عناصر إلى سلتك.",
+    "continueShopping": "متابعة التسوق",
+    "orderSummary": "ملخص الطلب",
+    "total": "الإجمالي",
+    "savingMessage": "أنت توفّر بفضل الخصومات المطبقة!",
+    "yourName": "اسمك",
+    "namePlaceholder": "أدخل اسمك",
+    "yourPhone": "رقم هاتفك",
+    "phonePlaceholder": "01xxxxxxxxx",
+    "orderWhatsApp": "اطلب الآن عبر واتساب",
+    "whatsappHint": "سيتم تحويلك إلى واتساب لإتمام طلبك مع {storeName}.",
+    "emptyError": "سلتك فارغة",
+    "addedToCart": "تمت الإضافة إلى السلة",
+    "redirecting": "جاري التحويل إلى واتساب..."
+  },
+  "footer": {
+    "defaultDescription": "متجرك الشامل للمنتجات المميزة.",
+    "quickLinks": "روابط سريعة",
+    "followUs": "تابعنا",
+    "facebook": "فيسبوك",
+    "instagram": "إنستغرام",
+    "tiktok": "تيك توك",
+    "rights": "جميع الحقوق محفوظة."
+  },
+  "common": {
+    "previousPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "pagination": "ترقيم الصفحات",
+    "off": "خصم",
+    "sale": "تخفيض"
+  },
+  "notFound": {
+    "title": "الصفحة غير موجودة",
+    "description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "goHome": "العودة للرئيسية"
+  },
+  "validation": {
+    "nameRequired": "الاسم مطلوب",
+    "phoneRequired": "رقم هاتف صحيح مطلوب",
+    "phoneInvalid": "رقم هاتف غير صالح"
+  },
+  "whatsapp": {
+    "greeting": "مرحباً،",
+    "orderIntro": "أود تقديم طلب.",
+    "products": "المنتجات:",
+    "quantity": "الكمية",
+    "price": "السعر",
+    "totalPrice": "السعر الإجمالي",
+    "customerName": "اسم العميل:",
+    "customerPhone": "هاتف العميل:",
+    "thankYou": "شكراً لك."
+  },
+  "language": {
+    "switch": "اللغة",
+    "en": "English",
+    "ar": "العربية"
+  }
+}
