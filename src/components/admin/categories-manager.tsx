@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,6 +42,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const router = useRouter();
+  const t = useTranslations("admin");
 
   const {
     register,
@@ -54,7 +56,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
 
   const openCreate = () => {
     setEditing(null);
-    reset({ name: "", slug: "", description: "", icon: "🛍️" });
+    reset({ name: "", slug: "", description: "", icon: "" });
     setOpen(true);
   };
 
@@ -64,7 +66,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
       name: category.name,
       slug: category.slug,
       description: category.description ?? "",
-      icon: category.icon ?? "🛍️",
+      icon: category.icon ?? "",
     });
     setOpen(true);
   };
@@ -87,7 +89,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
           c.id === editing.id ? { ...c, ...payload } : c
         )
       );
-      toast.success("Category updated");
+      toast.success(t("toast.categoryUpdated"));
     } else {
       const { data: newCat, error } = await supabase
         .from("categories")
@@ -99,7 +101,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
         return;
       }
       setCategories([...categories, newCat]);
-      toast.success("Category created");
+      toast.success(t("toast.categoryCreated"));
     }
 
     setOpen(false);
@@ -114,22 +116,22 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
       return;
     }
     setCategories(categories.filter((c) => c.id !== id));
-    toast.success("Category deleted");
+    toast.success(t("toast.categoryDeleted"));
     router.refresh();
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Categories</h1>
+        <h1 className="text-3xl font-bold">{t("categories")}</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Category
+          {t("addCategory")}
         </Button>
       </div>
 
       {categories.length === 0 ? (
-        <p className="text-muted-foreground">No categories yet.</p>
+        <p className="text-muted-foreground">{t("empty.noCategories")}</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category) => (
@@ -138,7 +140,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
               className="rounded-xl border bg-card p-4 flex items-start justify-between"
             >
               <div>
-                <span className="text-2xl">{category.icon}</span>
+                {category.icon && <span className="text-2xl">{category.icon}</span>}
                 <h3 className="font-semibold mt-2">{category.name}</h3>
                 <p className="text-xs text-muted-foreground">{category.slug}</p>
                 {category.description && (
@@ -159,15 +161,15 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                      <AlertDialogTitle>{t("deleteCategory")}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Delete &quot;{category.name}&quot;? Products in this category will become uncategorized.
+                        {t("deleteCategoryDescription", { name: category.name })}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction onClick={() => deleteCategory(category.id)}>
-                        Delete
+                        {t("delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -181,11 +183,11 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Category" : "Add Category"}</DialogTitle>
+            <DialogTitle>{editing ? t("editCategory") : t("addCategory")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("fields.name")}</Label>
               <Input
                 id="name"
                 {...register("name")}
@@ -199,19 +201,19 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
               )}
             </div>
             <div>
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">{t("fields.slug")}</Label>
               <Input id="slug" {...register("slug")} />
             </div>
             <div>
-              <Label htmlFor="icon">Icon (emoji)</Label>
-              <Input id="icon" {...register("icon")} placeholder="🛍️" />
+              <Label htmlFor="icon">{t("fields.icon")}</Label>
+              <Input id="icon" {...register("icon")} placeholder={t("fields.iconPlaceholder")} />
             </div>
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("fields.description")}</Label>
               <Textarea id="description" {...register("description")} />
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full">
-              {editing ? "Update" : "Create"}
+              {editing ? t("update") : t("create")}
             </Button>
           </form>
         </DialogContent>

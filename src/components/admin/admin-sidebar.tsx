@@ -1,35 +1,35 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 import {
   LayoutDashboard,
   Package,
   FolderOpen,
   Percent,
   Settings,
-  LogOut,
   Store,
 } from "lucide-react";
 import { AdminLogoutButton } from "@/components/admin/logout-button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/products", label: "Products", icon: Package },
-  { href: "/admin/categories", label: "Categories", icon: FolderOpen },
-  { href: "/admin/discounts", label: "Discounts", icon: Percent },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
-];
+  { href: "/admin", labelKey: "dashboard", icon: LayoutDashboard },
+  { href: "/admin/products", labelKey: "products", icon: Package },
+  { href: "/admin/categories", labelKey: "categories", icon: FolderOpen },
+  { href: "/admin/discounts", labelKey: "discounts", icon: Percent },
+  { href: "/admin/settings", labelKey: "settings", icon: Settings },
+] as const;
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const t = useTranslations("admin");
 
   return (
-    <aside className="hidden md:flex w-64 flex-col border-r bg-card min-h-screen">
-      <div className="flex h-16 items-center gap-2 border-b px-6">
+    <aside className="hidden md:flex w-64 flex-col border-e bg-card min-h-screen">
+      <div className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
         <Store className="h-6 w-6" />
-        <span className="font-bold">Admin Panel</span>
+        <span className="font-bold">{t("panel")}</span>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         {navItems.map((item) => {
@@ -49,7 +49,7 @@ export function AdminSidebar() {
               )}
             >
               <item.icon className="h-4 w-4" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}
@@ -63,9 +63,10 @@ export function AdminSidebar() {
 
 export function AdminMobileNav() {
   const pathname = usePathname();
+  const t = useTranslations("admin");
 
   return (
-    <nav className="md:hidden flex overflow-x-auto border-b bg-card px-4 py-2 gap-2">
+    <nav className="md:hidden flex overflow-x-auto gap-2">
       {navItems.map((item) => {
         const isActive =
           item.href === "/admin"
@@ -83,7 +84,7 @@ export function AdminMobileNav() {
             )}
           >
             <item.icon className="h-3 w-3" />
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         );
       })}

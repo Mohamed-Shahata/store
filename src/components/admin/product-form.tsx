@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ interface ProductFormProps {
 
 export function ProductForm({ categories, product }: ProductFormProps) {
   const router = useRouter();
+  const t = useTranslations("admin");
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>(
     product?.product_images
@@ -47,7 +49,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<ProductFormData>({
@@ -77,7 +79,12 @@ export function ProductForm({ categories, product }: ProductFormProps) {
         },
   });
 
-  const name = watch("name");
+  const name = useWatch({ control, name: "name" });
+  const categoryId = useWatch({ control, name: "category_id" });
+  const flagValues = useWatch({
+    control,
+    name: ["featured", "best_seller", "new_arrival", "active", "archived"],
+  });
 
   const onSubmit = async (data: ProductFormData) => {
     setLoading(true);
@@ -114,7 +121,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           );
         }
 
-        toast.success("Product updated");
+        toast.success(t("toast.productUpdated"));
       } else {
         const { data: newProduct, error } = await supabase
           .from("products")
@@ -134,13 +141,13 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           );
         }
 
-        toast.success("Product created");
+        toast.success(t("toast.productCreated"));
       }
 
       router.push("/admin/products");
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : t("toast.genericError"));
     } finally {
       setLoading(false);
     }
@@ -150,18 +157,18 @@ export function ProductForm({ categories, product }: ProductFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle>Basic Information</CardTitle>
+          <CardTitle>{t("basicInformation")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t("fields.name")}</Label>
             <Input id="name" {...register("name")} />
             {errors.name && (
               <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
             )}
           </div>
           <div>
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">{t("fields.slug")}</Label>
             <Input
               id="slug"
               placeholder={name ? slugify(name) : "product-slug"}
@@ -169,22 +176,22 @@ export function ProductForm({ categories, product }: ProductFormProps) {
             />
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("fields.description")}</Label>
             <Textarea id="description" rows={4} {...register("description")} />
           </div>
           <div>
-            <Label>Category</Label>
+            <Label>{t("category")}</Label>
             <Select
-              value={watch("category_id") ?? "none"}
+              value={categoryId ?? "none"}
               onValueChange={(v) =>
                 setValue("category_id", v === "none" ? null : v)
               }
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder={t("selectCategory")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No Category</SelectItem>
+                <SelectItem value="none">{t("noCategory")}</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}
@@ -198,18 +205,18 @@ export function ProductForm({ categories, product }: ProductFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Pricing & Stock</CardTitle>
+          <CardTitle>{t("pricingStock")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <div>
-            <Label htmlFor="price">Price (EGP)</Label>
+            <Label htmlFor="price">{t("priceEgp")}</Label>
             <Input id="price" type="number" step="0.01" {...register("price", { valueAsNumber: true })} />
             {errors.price && (
               <p className="text-sm text-destructive mt-1">{errors.price.message}</p>
             )}
           </div>
           <div>
-            <Label htmlFor="discount_price">Discount Price</Label>
+            <Label htmlFor="discount_price">{t("discountPrice")}</Label>
             <Input
               id="discount_price"
               type="number"
@@ -218,7 +225,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
             />
           </div>
           <div>
-            <Label htmlFor="stock_quantity">Stock Quantity</Label>
+            <Label htmlFor="stock_quantity">{t("stockQuantity")}</Label>
             <Input
               id="stock_quantity"
               type="number"
@@ -230,7 +237,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Images</CardTitle>
+          <CardTitle>{t("images")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ImageUpload images={images} onChange={setImages} maxImages={8} />
@@ -239,21 +246,21 @@ export function ProductForm({ categories, product }: ProductFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Flags & Status</CardTitle>
+          <CardTitle>{t("flagsStatus")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {[
-            { key: "featured" as const, label: "Featured" },
-            { key: "best_seller" as const, label: "Best Seller" },
-            { key: "new_arrival" as const, label: "New Arrival" },
-            { key: "active" as const, label: "Active" },
-            { key: "archived" as const, label: "Archived" },
-          ].map(({ key, label }) => (
+            { key: "featured" as const, label: t("featured") },
+            { key: "best_seller" as const, label: t("bestSeller") },
+            { key: "new_arrival" as const, label: t("newArrival") },
+            { key: "active" as const, label: t("active") },
+            { key: "archived" as const, label: t("archived") },
+          ].map(({ key, label }, index) => (
             <div key={key} className="flex items-center justify-between">
               <Label htmlFor={key}>{label}</Label>
               <Switch
                 id={key}
-                checked={watch(key)}
+                checked={Boolean(flagValues[index])}
                 onCheckedChange={(checked) => setValue(key, checked)}
               />
             </div>
@@ -264,10 +271,10 @@ export function ProductForm({ categories, product }: ProductFormProps) {
       <div className="flex gap-4">
         <Button type="submit" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {product ? "Update Product" : "Create Product"}
+          {product ? t("updateProduct") : t("createProduct")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
+          {t("cancel")}
         </Button>
       </div>
     </form>

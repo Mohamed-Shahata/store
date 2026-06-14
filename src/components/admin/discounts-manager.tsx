@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -50,12 +51,13 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Discount | null>(null);
   const router = useRouter();
+  const t = useTranslations("admin");
 
   const {
     register,
     handleSubmit,
     reset,
-    watch,
+    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<DiscountFormData>({
@@ -76,6 +78,9 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
     });
     setOpen(true);
   };
+
+  const discountType = useWatch({ control, name: "type" });
+  const active = useWatch({ control, name: "active" });
 
   const openEdit = (discount: Discount) => {
     setEditing(discount);
@@ -113,7 +118,7 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
           d.id === editing.id ? { ...d, ...payload } : d
         )
       );
-      toast.success("Discount updated");
+      toast.success(t("toast.discountUpdated"));
     } else {
       const { data: newDiscount, error } = await supabase
         .from("discounts")
@@ -125,7 +130,7 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
         return;
       }
       setDiscounts([newDiscount, ...discounts]);
-      toast.success("Discount created");
+      toast.success(t("toast.discountCreated"));
     }
 
     setOpen(false);
@@ -140,22 +145,22 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
       return;
     }
     setDiscounts(discounts.filter((d) => d.id !== id));
-    toast.success("Discount deleted");
+    toast.success(t("toast.discountDeleted"));
     router.refresh();
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Discounts</h1>
+        <h1 className="text-3xl font-bold">{t("discounts")}</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Discount
+          {t("addDiscount")}
         </Button>
       </div>
 
       {discounts.length === 0 ? (
-        <p className="text-muted-foreground">No discounts yet.</p>
+        <p className="text-muted-foreground">{t("empty.noDiscounts")}</p>
       ) : (
         <div className="space-y-3">
           {discounts.map((discount) => (
@@ -168,19 +173,19 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
                   <h3 className="font-semibold">{discount.title}</h3>
                   <Badge variant="sale">{discount.badge_text ?? "SALE"}</Badge>
                   {isDiscountActive(discount) ? (
-                    <Badge>Active</Badge>
+                    <Badge>{t("active")}</Badge>
                   ) : (
-                    <Badge variant="secondary">Inactive</Badge>
+                    <Badge variant="secondary">{t("inactive")}</Badge>
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {discount.type === "percentage"
-                    ? `${discount.value}% off`
-                    : `${discount.value} EGP off`}
+                    ? t("percentageOff", { value: discount.value })
+                    : t("fixedOff", { value: discount.value })}
                   {discount.start_date &&
-                    ` • From ${format(new Date(discount.start_date), "MMM d, yyyy")}`}
+                    ` ${t("from")} ${format(new Date(discount.start_date), "MMM d, yyyy")}`}
                   {discount.end_date &&
-                    ` • Until ${format(new Date(discount.end_date), "MMM d, yyyy")}`}
+                    ` ${t("until")} ${format(new Date(discount.end_date), "MMM d, yyyy")}`}
                 </p>
               </div>
               <div className="flex gap-1">
@@ -195,15 +200,15 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Discount</AlertDialogTitle>
+                      <AlertDialogTitle>{t("deleteDiscount")}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Delete &quot;{discount.title}&quot;?
+                        {t("deleteDiscountDescription", { title: discount.title })}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction onClick={() => deleteDiscount(discount.id)}>
-                        Delete
+                        {t("delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -217,11 +222,11 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Discount" : "Add Discount"}</DialogTitle>
+            <DialogTitle>{editing ? t("editDiscount") : t("addDiscount")}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{t("fields.title")}</Label>
               <Input id="title" {...register("title")} />
               {errors.title && (
                 <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
@@ -229,49 +234,49 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Type</Label>
+                <Label>{t("fields.type")}</Label>
                 <Select
-                  value={watch("type")}
+                  value={discountType}
                   onValueChange={(v: "percentage" | "fixed") => setValue("type", v)}
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percentage">Percentage</SelectItem>
-                    <SelectItem value="fixed">Fixed Amount</SelectItem>
+                    <SelectItem value="percentage">{t("percentage")}</SelectItem>
+                    <SelectItem value="fixed">{t("fixedAmount")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="value">Value</Label>
+                <Label htmlFor="value">{t("fields.value")}</Label>
                 <Input id="value" type="number" step="0.01" {...register("value", { valueAsNumber: true })} />
               </div>
             </div>
             <div>
-              <Label htmlFor="badge_text">Badge Text</Label>
-              <Input id="badge_text" placeholder="SALE, HOT DEAL, etc." {...register("badge_text")} />
+              <Label htmlFor="badge_text">{t("fields.badgeText")}</Label>
+              <Input id="badge_text" placeholder="SALE" {...register("badge_text")} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="start_date">Start Date</Label>
+                <Label htmlFor="start_date">{t("fields.startDate")}</Label>
                 <Input id="start_date" type="datetime-local" {...register("start_date")} />
               </div>
               <div>
-                <Label htmlFor="end_date">End Date</Label>
+                <Label htmlFor="end_date">{t("fields.endDate")}</Label>
                 <Input id="end_date" type="datetime-local" {...register("end_date")} />
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="active">Active</Label>
+              <Label htmlFor="active">{t("active")}</Label>
               <Switch
                 id="active"
-                checked={watch("active")}
+                checked={active}
                 onCheckedChange={(checked) => setValue("active", checked)}
               />
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full">
-              {editing ? "Update" : "Create"}
+              {editing ? t("update") : t("create")}
             </Button>
           </form>
         </DialogContent>

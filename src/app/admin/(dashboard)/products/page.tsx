@@ -1,8 +1,5 @@
-import { getAllProductsAdmin, getAllCategoriesAdmin } from "@/lib/data/products";
-import { ProductsTable } from "@/components/admin/products-table";
+import { redirect } from "next/navigation";
 
-export default async function AdminProductsPage() {
-  const products = await getAllProductsAdmin();
-
-  return <ProductsTable products={products} />;
+export default function AdminProductsPage() {
+  redirect("/en/admin/products");
 }

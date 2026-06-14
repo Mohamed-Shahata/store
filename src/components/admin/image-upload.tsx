@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,13 +22,14 @@ export function ImageUpload({
   bucket = "product-images",
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const t = useTranslations("admin");
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files?.length) return;
 
     if (images.length + files.length > maxImages) {
-      toast.error(`Maximum ${maxImages} images allowed`);
+      toast.error(t("toast.maxImages", { count: maxImages }));
       return;
     }
 
@@ -39,9 +41,9 @@ export function ImageUpload({
         uploaded.push(url);
       }
       onChange([...images, ...uploaded]);
-      toast.success("Images uploaded");
+      toast.success(t("toast.imagesUploaded"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      toast.error(err instanceof Error ? err.message : t("toast.uploadFailed"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -77,7 +79,7 @@ export function ImageUpload({
             ) : (
               <>
                 <Upload className="h-6 w-6 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground mt-1">Upload</span>
+                <span className="text-xs text-muted-foreground mt-1">{t("upload")}</span>
               </>
             )}
             <input
@@ -92,7 +94,7 @@ export function ImageUpload({
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        {images.length}/{maxImages} images
+        {t("imageCount", { current: images.length, max: maxImages })}
       </p>
     </div>
   );
@@ -110,6 +112,7 @@ export function SingleImageUpload({
   bucket = "store-assets",
 }: SingleImageUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const t = useTranslations("admin");
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -119,9 +122,9 @@ export function SingleImageUpload({
     try {
       const url = await uploadImage(file, bucket);
       onChange(url);
-      toast.success("Image uploaded");
+      toast.success(t("toast.imageUploaded"));
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      toast.error(err instanceof Error ? err.message : t("toast.uploadFailed"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -152,7 +155,7 @@ export function SingleImageUpload({
           ) : (
             <>
               <Upload className="h-6 w-6 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground mt-1">Upload</span>
+              <span className="text-xs text-muted-foreground mt-1">{t("upload")}</span>
             </>
           )}
           <input

@@ -1,8 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
+import { routing, type Locale } from "@/i18n/routing";
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest,
+  locale: Locale = routing.defaultLocale
+) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -30,19 +34,21 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const adminBase = `/${locale}/admin`;
+  const loginPath = `${adminBase}/login`;
   const isAdminRoute =
-    request.nextUrl.pathname.startsWith("/admin") &&
-    !request.nextUrl.pathname.startsWith("/admin/login");
+    request.nextUrl.pathname.startsWith(adminBase) &&
+    !request.nextUrl.pathname.startsWith(loginPath);
 
   if (isAdminRoute && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin/login";
+    url.pathname = loginPath;
     return NextResponse.redirect(url);
   }
 
-  if (request.nextUrl.pathname === "/admin/login" && user) {
+  if (request.nextUrl.pathname === loginPath && user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin";
+    url.pathname = adminBase;
     return NextResponse.redirect(url);
   }
 

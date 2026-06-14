@@ -1,7 +1,5 @@
-import { getAllDiscountsAdmin } from "@/lib/data/products";
-import { DiscountsManager } from "@/components/admin/discounts-manager";
+import { redirect } from "next/navigation";
 
-export default async function AdminDiscountsPage() {
-  const discounts = await getAllDiscountsAdmin();
-  return <DiscountsManager discounts={discounts} />;
+export default function AdminDiscountsPage() {
+  redirect("/en/admin/discounts");
 }

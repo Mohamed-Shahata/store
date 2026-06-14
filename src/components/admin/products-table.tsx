@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Plus, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ interface ProductsTableProps {
 export function ProductsTable({ products: initialProducts }: ProductsTableProps) {
   const [products, setProducts] = useState(initialProducts);
   const router = useRouter();
+  const t = useTranslations("admin");
 
   const deleteProduct = async (id: string) => {
     const supabase = createClient();
@@ -38,7 +39,7 @@ export function ProductsTable({ products: initialProducts }: ProductsTableProps)
       return;
     }
     setProducts(products.filter((p) => p.id !== id));
-    toast.success("Product deleted");
+    toast.success(t("toast.productDeleted"));
     router.refresh();
   };
 
@@ -57,36 +58,38 @@ export function ProductsTable({ products: initialProducts }: ProductsTableProps)
         p.id === id ? { ...p, archived: !archived } : p
       )
     );
-    toast.success(archived ? "Product restored" : "Product archived");
+    toast.success(
+      archived ? t("toast.productRestored") : t("toast.productArchived")
+    );
     router.refresh();
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Products</h1>
+        <h1 className="text-3xl font-bold">{t("products")}</h1>
         <Button asChild>
           <Link href="/admin/products/new">
             <Plus className="mr-2 h-4 w-4" />
-            Add Product
+            {t("addProduct")}
           </Link>
         </Button>
       </div>
 
       {products.length === 0 ? (
-        <p className="text-muted-foreground">No products yet. Create your first product.</p>
+        <p className="text-muted-foreground">{t("empty.noProducts")}</p>
       ) : (
         <div className="rounded-xl border overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="p-4 text-left font-medium">Name</th>
-                <th className="p-4 text-left font-medium">Category</th>
-                <th className="p-4 text-left font-medium">Price</th>
-                <th className="p-4 text-left font-medium">Stock</th>
-                <th className="p-4 text-left font-medium">Status</th>
-                <th className="p-4 text-left font-medium">Flags</th>
-                <th className="p-4 text-right font-medium">Actions</th>
+                <th className="p-4 text-start font-medium">{t("fields.name")}</th>
+                <th className="p-4 text-start font-medium">{t("category")}</th>
+                <th className="p-4 text-start font-medium">{t("price")}</th>
+                <th className="p-4 text-start font-medium">{t("stock")}</th>
+                <th className="p-4 text-start font-medium">{t("status")}</th>
+                <th className="p-4 text-start font-medium">{t("flags")}</th>
+                <th className="p-4 text-end font-medium">{t("actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -96,23 +99,23 @@ export function ProductsTable({ products: initialProducts }: ProductsTableProps)
                     <div className="font-medium">{product.name}</div>
                     <div className="text-xs text-muted-foreground">{product.slug}</div>
                   </td>
-                  <td className="p-4">{product.category?.name ?? "—"}</td>
+                  <td className="p-4">{product.category?.name ?? "-"}</td>
                   <td className="p-4">{formatPrice(product.price)}</td>
                   <td className="p-4">{product.stock_quantity}</td>
                   <td className="p-4">
                     {product.archived ? (
-                      <Badge variant="secondary">Archived</Badge>
+                      <Badge variant="secondary">{t("archived")}</Badge>
                     ) : product.active ? (
-                      <Badge>Active</Badge>
+                      <Badge>{t("active")}</Badge>
                     ) : (
-                      <Badge variant="outline">Inactive</Badge>
+                      <Badge variant="outline">{t("inactive")}</Badge>
                     )}
                   </td>
                   <td className="p-4">
                     <div className="flex gap-1 flex-wrap">
-                      {product.featured && <Badge variant="sale">Featured</Badge>}
-                      {product.best_seller && <Badge variant="sale">Best Seller</Badge>}
-                      {product.new_arrival && <Badge variant="sale">New</Badge>}
+                      {product.featured && <Badge variant="sale">{t("featured")}</Badge>}
+                      {product.best_seller && <Badge variant="sale">{t("bestSeller")}</Badge>}
+                      {product.new_arrival && <Badge variant="sale">{t("newArrival")}</Badge>}
                     </div>
                   </td>
                   <td className="p-4">
@@ -141,15 +144,15 @@ export function ProductsTable({ products: initialProducts }: ProductsTableProps)
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                            <AlertDialogTitle>{t("deleteProduct")}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This will permanently delete &quot;{product.name}&quot;. This action cannot be undone.
+                              {t("deleteProductDescription", { name: product.name })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => deleteProduct(product.id)}>
-                              Delete
+                              {t("delete")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

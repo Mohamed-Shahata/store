@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -30,6 +31,7 @@ interface StoreSettingsFormProps {
 
 export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
   const router = useRouter();
+  const t = useTranslations("admin");
   const [loading, setLoading] = useState(false);
   const [logo, setLogo] = useState<string | null>(settings.logo);
   const [banners, setBanners] = useState<string[]>(
@@ -79,7 +81,7 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
       return;
     }
 
-    toast.success("Settings saved");
+    toast.success(t("toast.settingsSaved"));
     router.refresh();
     setLoading(false);
   };
@@ -88,11 +90,11 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle>Store Information</CardTitle>
+          <CardTitle>{t("storeInformation")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="store_name">Store Name</Label>
+            <Label htmlFor="store_name">{t("fields.storeName")}</Label>
             <Input id="store_name" {...register("store_name")} />
             {errors.store_name && (
               <p className="text-sm text-destructive mt-1">
@@ -101,15 +103,15 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
             )}
           </div>
           <div>
-            <Label htmlFor="store_description">Store Description</Label>
+            <Label htmlFor="store_description">{t("fields.storeDescription")}</Label>
             <Textarea id="store_description" rows={3} {...register("store_description")} />
           </div>
           <div>
-            <Label>Store Logo</Label>
+            <Label>{t("storeLogo")}</Label>
             <SingleImageUpload value={logo} onChange={setLogo} />
           </div>
           <div>
-            <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
+            <Label htmlFor="whatsapp_number">{t("fields.whatsappNumber")}</Label>
             <Input id="whatsapp_number" {...register("whatsapp_number")} />
             {errors.whatsapp_number && (
               <p className="text-sm text-destructive mt-1">
@@ -122,7 +124,7 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Social Links</CardTitle>
+          <CardTitle>{t("socialLinks")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -142,7 +144,7 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Banner Images</CardTitle>
+          <CardTitle>{t("bannerImages")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ImageUpload
@@ -156,19 +158,19 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>SEO Settings</CardTitle>
+          <CardTitle>{t("seoSettings")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="seo_title">SEO Title</Label>
+            <Label htmlFor="seo_title">{t("fields.seoTitle")}</Label>
             <Input id="seo_title" {...register("seo_title")} />
           </div>
           <div>
-            <Label htmlFor="seo_description">SEO Description</Label>
+            <Label htmlFor="seo_description">{t("fields.seoDescription")}</Label>
             <Textarea id="seo_description" rows={2} {...register("seo_description")} />
           </div>
           <div>
-            <Label htmlFor="seo_keywords">SEO Keywords (comma separated)</Label>
+            <Label htmlFor="seo_keywords">{t("fields.seoKeywords")}</Label>
             <Input id="seo_keywords" {...register("seo_keywords")} />
           </div>
         </CardContent>
@@ -176,7 +178,7 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
 
       <Button type="submit" disabled={loading}>
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Save Settings
+        {t("saveSettings")}
       </Button>
     </form>
   );
