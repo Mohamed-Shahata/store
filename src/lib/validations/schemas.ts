@@ -37,6 +37,31 @@ export const discountSchema = z.object({
   active: z.boolean(),
 });
 
+export const addAdminSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export const changeEmailSchema = z.object({
+  currentPassword: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Invalid email address"),
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+    newPassword: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export const storeSettingsSchema = z.object({
   store_name: z.string().min(2, "Store name is required"),
   store_description: z.string().optional(),
@@ -70,3 +95,6 @@ export type CategoryFormData = z.infer<typeof categorySchema>;
 export type ProductFormData = z.infer<typeof productSchema>;
 export type DiscountFormData = z.infer<typeof discountSchema>;
 export type StoreSettingsFormData = z.infer<typeof storeSettingsSchema>;
+export type AddAdminFormData = z.infer<typeof addAdminSchema>;
+export type ChangeEmailFormData = z.infer<typeof changeEmailSchema>;
+export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;

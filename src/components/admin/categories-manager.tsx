@@ -27,7 +27,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { categorySchema, type CategoryFormData } from "@/lib/validations/schemas";
+import {
+  categorySchema,
+  type CategoryFormData,
+} from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/utils";
 import { toast } from "sonner";
@@ -37,7 +40,9 @@ interface CategoriesManagerProps {
   categories: Category[];
 }
 
-export function CategoriesManager({ categories: initial }: CategoriesManagerProps) {
+export function CategoriesManager({
+  categories: initial,
+}: CategoriesManagerProps) {
   const [categories, setCategories] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
@@ -85,9 +90,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
         return;
       }
       setCategories(
-        categories.map((c) =>
-          c.id === editing.id ? { ...c, ...payload } : c
-        )
+        categories.map((c) => (c.id === editing.id ? { ...c, ...payload } : c)),
       );
       toast.success(t("toast.categoryUpdated"));
     } else {
@@ -122,7 +125,7 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <h1 className="text-3xl font-bold">{t("categories")}</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" />
@@ -137,20 +140,30 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
           {categories.map((category) => (
             <div
               key={category.id}
-              className="rounded-xl border bg-card p-4 flex items-start justify-between"
+              className="rounded-xl border bg-card p-4 flex items-start justify-between gap-3"
             >
-              <div>
-                {category.icon && <span className="text-2xl">{category.icon}</span>}
-                <h3 className="font-semibold mt-2">{category.name}</h3>
-                <p className="text-xs text-muted-foreground">{category.slug}</p>
+              <div className="min-w-0 flex-1">
+                {category.icon && (
+                  <span className="text-2xl">{category.icon}</span>
+                )}
+                <h3 className="font-semibold mt-2 break-words">
+                  {category.name}
+                </h3>
+                <p className="text-xs text-muted-foreground break-all">
+                  {category.slug}
+                </p>
                 {category.description && (
                   <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                     {category.description}
                   </p>
                 )}
               </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={() => openEdit(category)}>
+              <div className="flex gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => openEdit(category)}
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <AlertDialog>
@@ -163,12 +176,16 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
                     <AlertDialogHeader>
                       <AlertDialogTitle>{t("deleteCategory")}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        {t("deleteCategoryDescription", { name: category.name })}
+                        {t("deleteCategoryDescription", {
+                          name: category.name,
+                        })}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => deleteCategory(category.id)}>
+                      <AlertDialogAction
+                        onClick={() => deleteCategory(category.id)}
+                      >
                         {t("delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -183,7 +200,9 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? t("editCategory") : t("addCategory")}</DialogTitle>
+            <DialogTitle>
+              {editing ? t("editCategory") : t("addCategory")}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
@@ -197,7 +216,9 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
                 }}
               />
               {errors.name && (
-                <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.name.message}
+                </p>
               )}
             </div>
             <div>
@@ -206,7 +227,11 @@ export function CategoriesManager({ categories: initial }: CategoriesManagerProp
             </div>
             <div>
               <Label htmlFor="icon">{t("fields.icon")}</Label>
-              <Input id="icon" {...register("icon")} placeholder={t("fields.iconPlaceholder")} />
+              <Input
+                id="icon"
+                {...register("icon")}
+                placeholder={t("fields.iconPlaceholder")}
+              />
             </div>
             <div>
               <Label htmlFor="description">{t("fields.description")}</Label>

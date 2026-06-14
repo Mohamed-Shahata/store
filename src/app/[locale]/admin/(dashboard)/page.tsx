@@ -1,13 +1,5 @@
-import {
-  getDashboardStats,
-  getRecentProducts,
-} from "@/lib/data/products";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { getDashboardStats, getRecentProducts } from "@/lib/data/products";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, FolderOpen, ShoppingCart, Percent } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
@@ -91,12 +83,12 @@ export default async function AdminDashboardPage({
               {recentProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="flex items-center justify-between border-b pb-3 last:border-0"
+                  className="flex items-center justify-between gap-3 border-b pb-3 last:border-0"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <Link
                       href={`/admin/products/${product.id}/edit`}
-                      className="font-medium hover:underline"
+                      className="font-medium hover:underline break-words"
                     >
                       {product.name}
                     </Link>
@@ -104,7 +96,7 @@ export default async function AdminDashboardPage({
                       {product.category?.name ?? t("uncategorized")}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-end shrink-0">
                     <p className="font-medium">{formatPrice(product.price)}</p>
                     <p className="text-xs text-muted-foreground">
                       {t("stock")}: {product.stock_quantity}

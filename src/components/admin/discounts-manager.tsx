@@ -36,7 +36,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { discountSchema, type DiscountFormData } from "@/lib/validations/schemas";
+import {
+  discountSchema,
+  type DiscountFormData,
+} from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
 import { isDiscountActive } from "@/lib/utils";
 import { toast } from "sonner";
@@ -46,7 +49,9 @@ interface DiscountsManagerProps {
   discounts: Discount[];
 }
 
-export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) {
+export function DiscountsManager({
+  discounts: initial,
+}: DiscountsManagerProps) {
   const [discounts, setDiscounts] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Discount | null>(null);
@@ -114,9 +119,7 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
         return;
       }
       setDiscounts(
-        discounts.map((d) =>
-          d.id === editing.id ? { ...d, ...payload } : d
-        )
+        discounts.map((d) => (d.id === editing.id ? { ...d, ...payload } : d)),
       );
       toast.success(t("toast.discountUpdated"));
     } else {
@@ -151,7 +154,7 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <h1 className="text-3xl font-bold">{t("discounts")}</h1>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" />
@@ -166,11 +169,13 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
           {discounts.map((discount) => (
             <div
               key={discount.id}
-              className="rounded-xl border bg-card p-4 flex items-center justify-between"
+              className="rounded-xl border bg-card p-4 flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap"
             >
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{discount.title}</h3>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-semibold break-words">
+                    {discount.title}
+                  </h3>
                   <Badge variant="sale">{discount.badge_text ?? "SALE"}</Badge>
                   {isDiscountActive(discount) ? (
                     <Badge>{t("active")}</Badge>
@@ -178,7 +183,7 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
                     <Badge variant="secondary">{t("inactive")}</Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground mt-1 break-words">
                   {discount.type === "percentage"
                     ? t("percentageOff", { value: discount.value })
                     : t("fixedOff", { value: discount.value })}
@@ -188,8 +193,12 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
                     ` ${t("until")} ${format(new Date(discount.end_date), "MMM d, yyyy")}`}
                 </p>
               </div>
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={() => openEdit(discount)}>
+              <div className="flex gap-1 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => openEdit(discount)}
+                >
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <AlertDialog>
@@ -202,12 +211,16 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
                     <AlertDialogHeader>
                       <AlertDialogTitle>{t("deleteDiscount")}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        {t("deleteDiscountDescription", { title: discount.title })}
+                        {t("deleteDiscountDescription", {
+                          title: discount.title,
+                        })}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => deleteDiscount(discount.id)}>
+                      <AlertDialogAction
+                        onClick={() => deleteDiscount(discount.id)}
+                      >
                         {t("delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -222,49 +235,74 @@ export function DiscountsManager({ discounts: initial }: DiscountsManagerProps) 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editing ? t("editDiscount") : t("addDiscount")}</DialogTitle>
+            <DialogTitle>
+              {editing ? t("editDiscount") : t("addDiscount")}
+            </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <Label htmlFor="title">{t("fields.title")}</Label>
               <Input id="title" {...register("title")} />
               {errors.title && (
-                <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.title.message}
+                </p>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>{t("fields.type")}</Label>
                 <Select
                   value={discountType}
-                  onValueChange={(v: "percentage" | "fixed") => setValue("type", v)}
+                  onValueChange={(v: "percentage" | "fixed") =>
+                    setValue("type", v)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percentage">{t("percentage")}</SelectItem>
+                    <SelectItem value="percentage">
+                      {t("percentage")}
+                    </SelectItem>
                     <SelectItem value="fixed">{t("fixedAmount")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label htmlFor="value">{t("fields.value")}</Label>
-                <Input id="value" type="number" step="0.01" {...register("value", { valueAsNumber: true })} />
+                <Input
+                  id="value"
+                  type="number"
+                  step="0.01"
+                  {...register("value", { valueAsNumber: true })}
+                />
               </div>
             </div>
             <div>
               <Label htmlFor="badge_text">{t("fields.badgeText")}</Label>
-              <Input id="badge_text" placeholder="SALE" {...register("badge_text")} />
+              <Input
+                id="badge_text"
+                placeholder="SALE"
+                {...register("badge_text")}
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="start_date">{t("fields.startDate")}</Label>
-                <Input id="start_date" type="datetime-local" {...register("start_date")} />
+                <Input
+                  id="start_date"
+                  type="datetime-local"
+                  {...register("start_date")}
+                />
               </div>
               <div>
                 <Label htmlFor="end_date">{t("fields.endDate")}</Label>
-                <Input id="end_date" type="datetime-local" {...register("end_date")} />
+                <Input
+                  id="end_date"
+                  type="datetime-local"
+                  {...register("end_date")}
+                />
               </div>
             </div>
             <div className="flex items-center justify-between">

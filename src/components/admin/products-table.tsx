@@ -26,7 +26,74 @@ interface ProductsTableProps {
   products: ProductWithRelations[];
 }
 
-export function ProductsTable({ products: initialProducts }: ProductsTableProps) {
+function ProductStatusBadge({
+  product,
+  t,
+}: {
+  product: ProductWithRelations;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  if (product.archived)
+    return <Badge variant="secondary">{t("archived")}</Badge>;
+  if (product.active) return <Badge>{t("active")}</Badge>;
+  return <Badge variant="outline">{t("inactive")}</Badge>;
+}
+
+function ProductFlags({
+  product,
+  t,
+}: {
+  product: ProductWithRelations;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  if (!product.featured && !product.best_seller && !product.new_arrival)
+    return null;
+  return (
+    <div className="flex gap-1 flex-wrap">
+      {product.featured && <Badge variant="sale">{t("featured")}</Badge>}
+      {product.best_seller && <Badge variant="sale">{t("bestSeller")}</Badge>}
+      {product.new_arrival && <Badge variant="sale">{t("newArrival")}</Badge>}
+    </div>
+  );
+}
+
+function DeleteProductDialog({
+  product,
+  onDelete,
+  t,
+}: {
+  product: ProductWithRelations;
+  onDelete: (id: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("deleteProduct")}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t("deleteProductDescription", { name: product.name })}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => onDelete(product.id)}>
+            {t("delete")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+export function ProductsTable({
+  products: initialProducts,
+}: ProductsTableProps) {
   const [products, setProducts] = useState(initialProducts);
   const router = useRouter();
   const t = useTranslations("admin");
@@ -54,19 +121,17 @@ export function ProductsTable({ products: initialProducts }: ProductsTableProps)
       return;
     }
     setProducts(
-      products.map((p) =>
-        p.id === id ? { ...p, archived: !archived } : p
-      )
+      products.map((p) => (p.id === id ? { ...p, archived: !archived } : p)),
     );
     toast.success(
-      archived ? t("toast.productRestored") : t("toast.productArchived")
+      archived ? t("toast.productRestored") : t("toast.productArchived"),
     );
     router.refresh();
   };
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
         <h1 className="text-3xl font-bold">{t("products")}</h1>
         <Button asChild>
           <Link href="/admin/products/new">
@@ -79,91 +144,139 @@ export function ProductsTable({ products: initialProducts }: ProductsTableProps)
       {products.length === 0 ? (
         <p className="text-muted-foreground">{t("empty.noProducts")}</p>
       ) : (
-        <div className="rounded-xl border overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="p-4 text-start font-medium">{t("fields.name")}</th>
-                <th className="p-4 text-start font-medium">{t("category")}</th>
-                <th className="p-4 text-start font-medium">{t("price")}</th>
-                <th className="p-4 text-start font-medium">{t("stock")}</th>
-                <th className="p-4 text-start font-medium">{t("status")}</th>
-                <th className="p-4 text-start font-medium">{t("flags")}</th>
-                <th className="p-4 text-end font-medium">{t("actions")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id} className="border-b last:border-0">
-                  <td className="p-4">
-                    <div className="font-medium">{product.name}</div>
-                    <div className="text-xs text-muted-foreground">{product.slug}</div>
-                  </td>
-                  <td className="p-4">{product.category?.name ?? "-"}</td>
-                  <td className="p-4">{formatPrice(product.price)}</td>
-                  <td className="p-4">{product.stock_quantity}</td>
-                  <td className="p-4">
-                    {product.archived ? (
-                      <Badge variant="secondary">{t("archived")}</Badge>
-                    ) : product.active ? (
-                      <Badge>{t("active")}</Badge>
-                    ) : (
-                      <Badge variant="outline">{t("inactive")}</Badge>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <div className="flex gap-1 flex-wrap">
-                      {product.featured && <Badge variant="sale">{t("featured")}</Badge>}
-                      {product.best_seller && <Badge variant="sale">{t("bestSeller")}</Badge>}
-                      {product.new_arrival && <Badge variant="sale">{t("newArrival")}</Badge>}
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex justify-end gap-1">
-                      <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/admin/products/${product.id}/edit`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => toggleArchive(product.id, product.archived)}
-                      >
-                        {product.archived ? (
-                          <ArchiveRestore className="h-4 w-4" />
-                        ) : (
-                          <Archive className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>{t("deleteProduct")}</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t("deleteProductDescription", { name: product.name })}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deleteProduct(product.id)}>
-                              {t("delete")}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </td>
+        <>
+          {/* Table view (md and up) */}
+          <div className="hidden md:block rounded-xl border overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="p-4 text-start font-medium">
+                    {t("fields.name")}
+                  </th>
+                  <th className="p-4 text-start font-medium">
+                    {t("category")}
+                  </th>
+                  <th className="p-4 text-start font-medium">{t("price")}</th>
+                  <th className="p-4 text-start font-medium">{t("stock")}</th>
+                  <th className="p-4 text-start font-medium">{t("status")}</th>
+                  <th className="p-4 text-start font-medium">{t("flags")}</th>
+                  <th className="p-4 text-end font-medium">{t("actions")}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {products.map((product) => (
+                  <tr key={product.id} className="border-b last:border-0">
+                    <td className="p-4 max-w-[220px]">
+                      <div className="font-medium break-words">
+                        {product.name}
+                      </div>
+                      <div className="text-xs text-muted-foreground break-all">
+                        {product.slug}
+                      </div>
+                    </td>
+                    <td className="p-4">{product.category?.name ?? "-"}</td>
+                    <td className="p-4 whitespace-nowrap">
+                      {formatPrice(product.price)}
+                    </td>
+                    <td className="p-4">{product.stock_quantity}</td>
+                    <td className="p-4">
+                      <ProductStatusBadge product={product} t={t} />
+                    </td>
+                    <td className="p-4">
+                      <ProductFlags product={product} t={t} />
+                    </td>
+                    <td className="p-4">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/admin/products/${product.id}/edit`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            toggleArchive(product.id, product.archived)
+                          }
+                        >
+                          {product.archived ? (
+                            <ArchiveRestore className="h-4 w-4" />
+                          ) : (
+                            <Archive className="h-4 w-4" />
+                          )}
+                        </Button>
+                        <DeleteProductDialog
+                          product={product}
+                          onDelete={deleteProduct}
+                          t={t}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Card view (mobile) */}
+          <div className="md:hidden space-y-3">
+            {products.map((product) => (
+              <div key={product.id} className="rounded-xl border bg-card p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium break-words">
+                      {product.name}
+                    </div>
+                    <div className="text-xs text-muted-foreground break-all">
+                      {product.slug}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {product.category?.name ?? t("uncategorized")}
+                    </div>
+                  </div>
+                  <ProductStatusBadge product={product} t={t} />
+                </div>
+
+                <div className="flex items-center justify-between mt-3 text-sm">
+                  <span className="font-medium">
+                    {formatPrice(product.price)}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {t("stock")}: {product.stock_quantity}
+                  </span>
+                </div>
+
+                <div className="mt-2">
+                  <ProductFlags product={product} t={t} />
+                </div>
+
+                <div className="flex justify-end gap-1 mt-3 border-t pt-3">
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href={`/admin/products/${product.id}/edit`}>
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => toggleArchive(product.id, product.archived)}
+                  >
+                    {product.archived ? (
+                      <ArchiveRestore className="h-4 w-4" />
+                    ) : (
+                      <Archive className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <DeleteProductDialog
+                    product={product}
+                    onDelete={deleteProduct}
+                    t={t}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

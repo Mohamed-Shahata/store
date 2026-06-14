@@ -217,7 +217,11 @@
       "whatsappNumber": "رقم واتساب",
       "seoTitle": "عنوان SEO",
       "seoDescription": "وصف SEO",
-      "seoKeywords": "كلمات SEO (مفصولة بفواصل)"
+      "seoKeywords": "كلمات SEO (مفصولة بفواصل)",
+      "currentPassword": "كلمة المرور الحالية",
+      "newEmail": "البريد الإلكتروني الجديد",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور"
     },
     "login": {
       "title": "تسجيل دخول الإدارة",
@@ -243,7 +247,27 @@
       "imageUploaded": "تم رفع الصورة",
       "uploadFailed": "فشل الرفع",
       "maxImages": "الحد الأقصى {count} صور",
-      "genericError": "حدث خطأ ما"
-    }
+      "genericError": "حدث خطأ ما",
+      "adminCreated": "تم إضافة المشرف بنجاح",
+      "adminDeleted": "تم إزالة المشرف",
+      "credentialsUpdated": "تم تحديث بيانات الدخول. سجّل الدخول مرة أخرى.",
+      "emailUnchanged": "هذا هو بريدك الإلكتروني الحالي بالفعل"
+    },
+    "accountSettings": "إعدادات الحساب",
+    "accountSettingsDescription": "حدّث البريد الإلكتروني وكلمة المرور المستخدمة لتسجيل الدخول إلى لوحة التحكم.",
+    "loginEmail": "البريد الإلكتروني لتسجيل الدخول",
+    "currentEmailIs": "أنت مسجل الدخول حاليًا باستخدام {email}",
+    "changeEmail": "تحديث البريد الإلكتروني",
+    "changePassword": "تحديث كلمة المرور",
+    "changePasswordDescription": "اختر كلمة مرور جديدة لحسابك.",
+    "adminAccounts": "حسابات المشرفين",
+    "manageAdminsDescription": "المشرفون المذكورون هنا يمكنهم تسجيل الدخول وإدارة لوحة تحكم المتجر.",
+    "addAdmin": "إضافة مشرف",
+    "removeAdmin": "إزالة مشرف",
+    "removeAdminDescription": "إزالة \"{email}\"؟ سيفقد الوصول إلى لوحة التحكم فورًا.",
+    "you": "أنت",
+    "addedOn": "أُضيف في",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة"
   }
 }

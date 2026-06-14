@@ -217,7 +217,11 @@
       "whatsappNumber": "WhatsApp Number",
       "seoTitle": "SEO Title",
       "seoDescription": "SEO Description",
-      "seoKeywords": "SEO Keywords (comma separated)"
+      "seoKeywords": "SEO Keywords (comma separated)",
+      "currentPassword": "Current Password",
+      "newEmail": "New Email",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password"
     },
     "login": {
       "title": "Admin Login",
@@ -243,7 +247,27 @@
       "imageUploaded": "Image uploaded",
       "uploadFailed": "Upload failed",
       "maxImages": "Maximum {count} images allowed",
-      "genericError": "Something went wrong"
-    }
+      "genericError": "Something went wrong",
+      "adminCreated": "Admin added successfully",
+      "adminDeleted": "Admin removed",
+      "credentialsUpdated": "Credentials updated. Please sign in again.",
+      "emailUnchanged": "This is already your current email"
+    },
+    "accountSettings": "Account Settings",
+    "accountSettingsDescription": "Update the email and password used to sign in to this dashboard.",
+    "loginEmail": "Login Email",
+    "currentEmailIs": "You're currently signed in as {email}",
+    "changeEmail": "Update Email",
+    "changePassword": "Update Password",
+    "changePasswordDescription": "Choose a new password for your account.",
+    "adminAccounts": "Admin Accounts",
+    "manageAdminsDescription": "Admins listed here can sign in and manage the store dashboard.",
+    "addAdmin": "Add Admin",
+    "removeAdmin": "Remove Admin",
+    "removeAdminDescription": "Remove \"{email}\"? They will immediately lose access to the dashboard.",
+    "you": "You",
+    "addedOn": "Added on",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   }
 }

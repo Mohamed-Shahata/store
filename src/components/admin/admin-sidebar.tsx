@@ -21,12 +21,20 @@ const navItems = [
   { href: "/admin/settings", labelKey: "settings", icon: Settings },
 ] as const;
 
-export function AdminSidebar() {
+interface AdminSidebarNavProps {
+  onNavigate?: () => void;
+}
+
+/**
+ * Shared sidebar content: logo, nav links, and logout button.
+ * Used by both the permanent desktop sidebar and the mobile drawer.
+ */
+export function AdminSidebarNav({ onNavigate }: AdminSidebarNavProps) {
   const pathname = usePathname();
   const t = useTranslations("admin");
 
   return (
-    <aside className="hidden md:flex w-64 flex-col border-e bg-card min-h-screen">
+    <div className="flex h-full flex-col">
       <div className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
         <Store className="h-6 w-6" />
         <span className="font-bold">{t("panel")}</span>
@@ -41,11 +49,12 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -57,37 +66,15 @@ export function AdminSidebar() {
       <div className="border-t p-4">
         <AdminLogoutButton />
       </div>
-    </aside>
+    </div>
   );
 }
 
-export function AdminMobileNav() {
-  const pathname = usePathname();
-  const t = useTranslations("admin");
-
+/** Permanent sidebar shown on md screens and up. */
+export function AdminSidebar() {
   return (
-    <nav className="md:hidden flex overflow-x-auto gap-2">
-      {navItems.map((item) => {
-        const isActive =
-          item.href === "/admin"
-            ? pathname === "/admin"
-            : pathname.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground bg-muted"
-            )}
-          >
-            <item.icon className="h-3 w-3" />
-            {t(item.labelKey)}
-          </Link>
-        );
-      })}
-    </nav>
+    <aside className="hidden md:flex w-64 shrink-0 flex-col border-e bg-card min-h-screen">
+      <AdminSidebarNav />
+    </aside>
   );
 }
