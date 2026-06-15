@@ -14,12 +14,14 @@ function Badge({
         "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors",
         {
           default: "border-transparent bg-primary text-primary-foreground",
-          secondary: "border-transparent bg-secondary text-secondary-foreground",
-          destructive: "border-transparent bg-destructive text-destructive-foreground",
+          secondary:
+            "border-transparent bg-secondary text-secondary-foreground",
+          destructive:
+            "border-transparent bg-destructive text-destructive-foreground",
           outline: "text-foreground",
-          sale: "border-transparent bg-red-500 text-white",
+          sale: "border-transparent bg-gold text-gold-foreground",
         }[variant],
-        className
+        className,
       )}
       {...props}
     />
