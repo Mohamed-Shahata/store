@@ -5,9 +5,8 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
-  { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
-  { key: "X-XSS-Protection", value: "1; mode=block" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
@@ -21,25 +20,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Supabase API + storage
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
-      // Next.js dev websocket
-      process.env.NODE_ENV === "development"
-        ? "connect-src 'self' ws://localhost:*"
-        : "",
-      // Cloudinary images + Supabase storage + next/image
-      "img-src 'self' data: blob: https://*.supabase.co https://res.cloudinary.com",
-      // Inline styles needed by Tailwind CSS + next/font
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      // Scripts: Next.js bundles only
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://*.supabase.co https://picsum.photos",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
       "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ]
-      .filter(Boolean)
-      .join("; "),
+    ].join("; "),
   },
 ];
 
@@ -53,14 +40,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "res.cloudinary.com",
+        hostname: "picsum.photos",
       },
     ],
   },
   async headers() {
     return [
       {
-        source: "/:path*",
+        source: "/(.*)",
         headers: securityHeaders,
       },
     ];

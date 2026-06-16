@@ -9,10 +9,8 @@ import {
 } from "@/lib/data/store-cache";
 import { HeroSection } from "@/components/store/hero-section";
 import { CategoriesSection } from "@/components/store/categories-section";
-import {
-  ProductSection,
-  PromoBanners,
-} from "@/components/store/product-section";
+import { ProductSection } from "@/components/store/product-section";
+import { PromoSlider } from "@/components/store/promo-slider";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {
@@ -50,7 +48,7 @@ export default async function HomePage({
         storeName={settings?.store_name ?? nav("premiumStore")}
         description={settings?.store_description}
       />
-      <PromoBanners banners={banners} />
+      <PromoSlider banners={banners} discounts={discounts} />
       <CategoriesSection categories={categories} />
       <ProductSection
         title={t("featuredProducts")}

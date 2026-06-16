@@ -26,7 +26,10 @@ export default function AdminDashboardLoading() {
         </CardHeader>
         <CardContent className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0">
+            <div
+              key={i}
+              className="flex items-center justify-between gap-3 border-b pb-3 last:border-0"
+            >
               <div className="space-y-2 min-w-0 flex-1">
                 <Skeleton className="h-4 w-1/2" />
                 <Skeleton className="h-3 w-1/4" />

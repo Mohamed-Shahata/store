@@ -27,8 +27,9 @@
     "bestSellers": "Best Sellers",
     "viewAll": "View All",
     "shopByCategory": "Shop by Category",
-    "limitedOffers": "Limited Time Offers",
-    "promoDescription": "Shop now and save on selected items. Order via WhatsApp for fast delivery!"
+    "limitedOffers": "Limited Offers",
+    "promoDescription": "Shop now and save on selected items. Order via WhatsApp for fast delivery!",
+    "shopNow": "Shop Now"
   },
   "products": {
     "title": "All Products",
