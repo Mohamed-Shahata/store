@@ -1,14 +1,14 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { MobileCartButton } from "@/components/layout/mobile-cart-button";
-import { getStoreSettings } from "@/lib/data/products";
+import { getStoreSettingsCached } from "@/lib/data/store-cache";
 
 export default async function StoreLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getStoreSettings();
+  const settings = await getStoreSettingsCached();
 
   return (
     <>

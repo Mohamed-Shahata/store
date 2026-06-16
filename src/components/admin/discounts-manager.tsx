@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -41,6 +41,7 @@ import {
   type DiscountFormData,
 } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
+import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
 import { isDiscountActive } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Discount } from "@/types/database";
@@ -55,6 +56,7 @@ export function DiscountsManager({
   const [discounts, setDiscounts] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Discount | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
   const t = useTranslations("admin");
 
@@ -137,19 +139,26 @@ export function DiscountsManager({
     }
 
     setOpen(false);
+    await revalidateStoreCache([CACHE_TAGS.discounts, CACHE_TAGS.products]);
     router.refresh();
   };
 
   const deleteDiscount = async (id: string) => {
-    const supabase = createClient();
-    const { error } = await supabase.from("discounts").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
+    setDeletingId(id);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from("discounts").delete().eq("id", id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      setDiscounts(discounts.filter((d) => d.id !== id));
+      toast.success(t("toast.discountDeleted"));
+      await revalidateStoreCache([CACHE_TAGS.discounts, CACHE_TAGS.products]);
+      router.refresh();
+    } finally {
+      setDeletingId(null);
     }
-    setDiscounts(discounts.filter((d) => d.id !== id));
-    toast.success(t("toast.discountDeleted"));
-    router.refresh();
   };
 
   return (
@@ -203,8 +212,16 @@ export function DiscountsManager({
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={deletingId === discount.id}
+                    >
+                      {deletingId === discount.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      )}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -220,7 +237,11 @@ export function DiscountsManager({
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => deleteDiscount(discount.id)}
+                        disabled={deletingId === discount.id}
                       >
+                        {deletingId === discount.id && (
+                          <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                        )}
                         {t("delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -314,6 +335,9 @@ export function DiscountsManager({
               />
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting && (
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
+              )}
               {editing ? t("update") : t("create")}
             </Button>
           </form>

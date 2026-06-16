@@ -10,18 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { SingleImageUpload, ImageUpload } from "@/components/admin/image-upload";
+  SingleImageUpload,
+  ImageUpload,
+} from "@/components/admin/image-upload";
 import {
   storeSettingsSchema,
   type StoreSettingsFormData,
 } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
+import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
 import { toast } from "sonner";
 import type { StoreSettings } from "@/types/database";
 
@@ -37,7 +36,7 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
   const [banners, setBanners] = useState<string[]>(
     Array.isArray(settings.banner_images)
       ? (settings.banner_images as string[])
-      : []
+      : [],
   );
 
   const {
@@ -82,6 +81,7 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
     }
 
     toast.success(t("toast.settingsSaved"));
+    await revalidateStoreCache([CACHE_TAGS.settings]);
     router.refresh();
     setLoading(false);
   };
@@ -103,15 +103,23 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
             )}
           </div>
           <div>
-            <Label htmlFor="store_description">{t("fields.storeDescription")}</Label>
-            <Textarea id="store_description" rows={3} {...register("store_description")} />
+            <Label htmlFor="store_description">
+              {t("fields.storeDescription")}
+            </Label>
+            <Textarea
+              id="store_description"
+              rows={3}
+              {...register("store_description")}
+            />
           </div>
           <div>
             <Label>{t("storeLogo")}</Label>
             <SingleImageUpload value={logo} onChange={setLogo} />
           </div>
           <div>
-            <Label htmlFor="whatsapp_number">{t("fields.whatsappNumber")}</Label>
+            <Label htmlFor="whatsapp_number">
+              {t("fields.whatsappNumber")}
+            </Label>
             <Input id="whatsapp_number" {...register("whatsapp_number")} />
             {errors.whatsapp_number && (
               <p className="text-sm text-destructive mt-1">
@@ -166,8 +174,14 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
             <Input id="seo_title" {...register("seo_title")} />
           </div>
           <div>
-            <Label htmlFor="seo_description">{t("fields.seoDescription")}</Label>
-            <Textarea id="seo_description" rows={2} {...register("seo_description")} />
+            <Label htmlFor="seo_description">
+              {t("fields.seoDescription")}
+            </Label>
+            <Textarea
+              id="seo_description"
+              rows={2}
+              {...register("seo_description")}
+            />
           </div>
           <div>
             <Label htmlFor="seo_keywords">{t("fields.seoKeywords")}</Label>

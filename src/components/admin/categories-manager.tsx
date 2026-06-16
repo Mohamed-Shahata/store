@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import {
   type CategoryFormData,
 } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
+import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
 import { slugify } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Category } from "@/types/database";
@@ -46,6 +47,7 @@ export function CategoriesManager({
   const [categories, setCategories] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
   const t = useTranslations("admin");
 
@@ -108,19 +110,26 @@ export function CategoriesManager({
     }
 
     setOpen(false);
+    await revalidateStoreCache([CACHE_TAGS.categories, CACHE_TAGS.products]);
     router.refresh();
   };
 
   const deleteCategory = async (id: string) => {
-    const supabase = createClient();
-    const { error } = await supabase.from("categories").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
+    setDeletingId(id);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from("categories").delete().eq("id", id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      setCategories(categories.filter((c) => c.id !== id));
+      toast.success(t("toast.categoryDeleted"));
+      await revalidateStoreCache([CACHE_TAGS.categories, CACHE_TAGS.products]);
+      router.refresh();
+    } finally {
+      setDeletingId(null);
     }
-    setCategories(categories.filter((c) => c.id !== id));
-    toast.success(t("toast.categoryDeleted"));
-    router.refresh();
   };
 
   return (
@@ -168,8 +177,16 @@ export function CategoriesManager({
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4 text-destructive" />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={deletingId === category.id}
+                    >
+                      {deletingId === category.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      )}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -185,7 +202,11 @@ export function CategoriesManager({
                       <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={() => deleteCategory(category.id)}
+                        disabled={deletingId === category.id}
                       >
+                        {deletingId === category.id && (
+                          <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                        )}
                         {t("delete")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
@@ -238,6 +259,9 @@ export function CategoriesManager({
               <Textarea id="description" {...register("description")} />
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full">
+              {isSubmitting && (
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
+              )}
               {editing ? t("update") : t("create")}
             </Button>
           </form>

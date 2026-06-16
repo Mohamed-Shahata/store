@@ -1,57 +1,69 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import {
+  requireAdminAuth,
+  checkRateLimit,
+  getClientIp,
+  rateLimitResponse,
+  safeJson,
+} from "@/lib/api-security";
+import { z } from "zod";
+
+const patchAccountSchema = z
+  .object({
+    currentPassword: z.string().min(6, "Current password is required"),
+    email: z
+      .string()
+      .email("Invalid email address")
+      .transform((v) => v.trim().toLowerCase())
+      .optional(),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters")
+      .optional(),
+  })
+  .refine((d) => d.email || d.password, {
+    message: "Provide a new email or a new password",
+  });
 
 export async function PATCH(request: Request) {
+  const ip = getClientIp(request);
+  const { allowed } = checkRateLimit(`account-update:${ip}`, 10, 60_000);
+  if (!allowed) return rateLimitResponse();
+
+  const auth = await requireAdminAuth(request);
+  if (!auth.ok) return auth.response;
+
+  const body = await safeJson<unknown>(request);
+  if (!body) {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 },
+    );
+  }
+
+  const parsed = patchAccountSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Invalid input" },
+      { status: 400 },
+    );
+  }
+
+  const { currentPassword, email, password } = parsed.data;
+
+  // Look up the current user's email to re-authenticate.
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || !user.email) {
+  if (!user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: admin } = await supabase
-    .from("admins")
-    .select("id")
-    .eq("id", user.id)
-    .single();
-
-  if (!admin) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  let body: { currentPassword?: string; email?: string; password?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-  }
-
-  const { currentPassword } = body;
-  const email = body.email?.trim().toLowerCase();
-  const password = body.password;
-
-  if (!currentPassword) {
-    return NextResponse.json(
-      { error: "Current password is required" },
-      { status: 400 }
-    );
-  }
-
-  if (!email && !password) {
-    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
-  }
-
-  if (password && password.length < 6) {
-    return NextResponse.json(
-      { error: "Password must be at least 6 characters" },
-      { status: 400 }
-    );
-  }
-
-  // Re-verify the current password before applying any sensitive changes.
+  // Verify current password before applying sensitive changes.
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email: user.email,
     password: currentPassword,
@@ -60,7 +72,7 @@ export async function PATCH(request: Request) {
   if (signInError) {
     return NextResponse.json(
       { error: "Current password is incorrect" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 

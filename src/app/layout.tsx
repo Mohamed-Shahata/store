@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Arabic } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ToastProvider } from "@/components/providers/toast-provider";
 import { LocaleHtmlAttributes } from "@/components/providers/locale-html-attributes";
-import { getStoreSettings } from "@/lib/data/products";
+import { getStoreSettingsCached } from "@/lib/data/store-cache";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,7 +24,7 @@ const notoSansArabic = Noto_Sans_Arabic({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getStoreSettings();
+  const settings = await getStoreSettingsCached();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   return {
@@ -79,6 +80,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} h-full`}
     >
       <body className="min-h-full flex flex-col antialiased font-sans">
+        <NextTopLoader color="hsl(42 65% 52%)" height={3} showSpinner={false} />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

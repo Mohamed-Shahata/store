@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2, ShieldCheck } from "lucide-react";
+import { Plus, Trash2, ShieldCheck, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -27,7 +27,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { addAdminSchema, type AddAdminFormData } from "@/lib/validations/schemas";
+import {
+  addAdminSchema,
+  type AddAdminFormData,
+} from "@/lib/validations/schemas";
 import { toast } from "sonner";
 import type { AdminUser } from "@/lib/data/admins";
 
@@ -36,9 +39,13 @@ interface AdminsManagerProps {
   currentAdminId: string;
 }
 
-export function AdminsManager({ admins: initial, currentAdminId }: AdminsManagerProps) {
+export function AdminsManager({
+  admins: initial,
+  currentAdminId,
+}: AdminsManagerProps) {
   const [admins, setAdmins] = useState(initial);
   const [open, setOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const t = useTranslations("admin");
 
   const {
@@ -74,20 +81,25 @@ export function AdminsManager({ admins: initial, currentAdminId }: AdminsManager
   };
 
   const deleteAdmin = async (id: string) => {
-    const response = await fetch("/api/admin/admins", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+    setDeletingId(id);
+    try {
+      const response = await fetch("/api/admin/admins", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
 
-    const result = await response.json();
-    if (!response.ok) {
-      toast.error(result.error ?? t("toast.genericError"));
-      return;
+      const result = await response.json();
+      if (!response.ok) {
+        toast.error(result.error ?? t("toast.genericError"));
+        return;
+      }
+
+      setAdmins(admins.filter((a) => a.id !== id));
+      toast.success(t("toast.adminDeleted"));
+    } finally {
+      setDeletingId(null);
     }
-
-    setAdmins(admins.filter((a) => a.id !== id));
-    toast.success(t("toast.adminDeleted"));
   };
 
   return (
@@ -116,35 +128,56 @@ export function AdminsManager({ admins: initial, currentAdminId }: AdminsManager
                   {admin.id === currentAdminId && (
                     <Badge variant="secondary">{t("you")}</Badge>
                   )}
+                  {admin.is_super_admin && (
+                    <Badge variant="sale">{t("superAdmin")}</Badge>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {t("addedOn")} {format(new Date(admin.created_at), "MMM d, yyyy")}
+                  {t("addedOn")}{" "}
+                  {format(new Date(admin.created_at), "MMM d, yyyy")}
                 </p>
               </div>
             </div>
-            {admin.id !== currentAdminId && admins.length > 1 && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="icon" className="shrink-0">
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("removeAdmin")}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t("removeAdminDescription", { email: admin.email })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => deleteAdmin(admin.id)}>
-                      {t("delete")}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+            {admin.id !== currentAdminId &&
+              !admin.is_super_admin &&
+              admins.length > 1 && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0"
+                      disabled={deletingId === admin.id}
+                    >
+                      {deletingId === admin.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t("removeAdmin")}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t("removeAdminDescription", { email: admin.email })}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteAdmin(admin.id)}
+                        disabled={deletingId === admin.id}
+                      >
+                        {deletingId === admin.id && (
+                          <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                        )}
+                        {t("delete")}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
           </div>
         ))}
       </div>
@@ -159,14 +192,22 @@ export function AdminsManager({ admins: initial, currentAdminId }: AdminsManager
               <Label htmlFor="admin-email">{t("fields.email")}</Label>
               <Input id="admin-email" type="email" {...register("email")} />
               {errors.email && (
-                <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.email.message}
+                </p>
               )}
             </div>
             <div>
               <Label htmlFor="admin-password">{t("fields.password")}</Label>
-              <Input id="admin-password" type="password" {...register("password")} />
+              <Input
+                id="admin-password"
+                type="password"
+                {...register("password")}
+              />
               {errors.password && (
-                <p className="text-sm text-destructive mt-1">{errors.password.message}</p>
+                <p className="text-sm text-destructive mt-1">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full">

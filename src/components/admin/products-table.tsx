@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Plus, Pencil, Trash2, Archive, ArchiveRestore } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Archive,
+  ArchiveRestore,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -19,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
+import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
 import { toast } from "sonner";
 import type { ProductWithRelations } from "@/types/database";
 
@@ -60,17 +68,23 @@ function ProductFlags({
 function DeleteProductDialog({
   product,
   onDelete,
+  pending,
   t,
 }: {
   product: ProductWithRelations;
   onDelete: (id: string) => void;
+  pending: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Trash2 className="h-4 w-4 text-destructive" />
+        <Button variant="ghost" size="icon" disabled={pending}>
+          {pending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4 text-destructive" />
+          )}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -82,7 +96,11 @@ function DeleteProductDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-          <AlertDialogAction onClick={() => onDelete(product.id)}>
+          <AlertDialogAction
+            onClick={() => onDelete(product.id)}
+            disabled={pending}
+          >
+            {pending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
             {t("delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -91,42 +109,107 @@ function DeleteProductDialog({
   );
 }
 
+function ProductActions({
+  product,
+  pendingAction,
+  onToggleArchive,
+  onDelete,
+  t,
+}: {
+  product: ProductWithRelations;
+  pendingAction: { id: string; action: "archive" | "delete" } | null;
+  onToggleArchive: (id: string, archived: boolean) => void;
+  onDelete: (id: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}) {
+  const isArchivePending =
+    pendingAction?.id === product.id && pendingAction.action === "archive";
+  const isDeletePending =
+    pendingAction?.id === product.id && pendingAction.action === "delete";
+
+  return (
+    <>
+      <Button variant="ghost" size="icon" asChild>
+        <Link href={`/admin/products/${product.id}/edit`}>
+          <Pencil className="h-4 w-4" />
+        </Link>
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        disabled={isArchivePending}
+        onClick={() => onToggleArchive(product.id, product.archived)}
+      >
+        {isArchivePending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : product.archived ? (
+          <ArchiveRestore className="h-4 w-4" />
+        ) : (
+          <Archive className="h-4 w-4" />
+        )}
+      </Button>
+      <DeleteProductDialog
+        product={product}
+        onDelete={onDelete}
+        pending={isDeletePending}
+        t={t}
+      />
+    </>
+  );
+}
+
 export function ProductsTable({
   products: initialProducts,
 }: ProductsTableProps) {
   const [products, setProducts] = useState(initialProducts);
+  const [pendingAction, setPendingAction] = useState<{
+    id: string;
+    action: "archive" | "delete";
+  } | null>(null);
   const router = useRouter();
   const t = useTranslations("admin");
 
   const deleteProduct = async (id: string) => {
-    const supabase = createClient();
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
+    setPendingAction({ id, action: "delete" });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      setProducts(products.filter((p) => p.id !== id));
+      toast.success(t("toast.productDeleted"));
+      await revalidateStoreCache([CACHE_TAGS.products]);
+      router.refresh();
+    } finally {
+      setPendingAction(null);
     }
-    setProducts(products.filter((p) => p.id !== id));
-    toast.success(t("toast.productDeleted"));
-    router.refresh();
   };
 
   const toggleArchive = async (id: string, archived: boolean) => {
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("products")
-      .update({ archived: !archived })
-      .eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
+    setPendingAction({ id, action: "archive" });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("products")
+        .update({ archived: !archived })
+        .eq("id", id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      setProducts(
+        products.map((p) => (p.id === id ? { ...p, archived: !archived } : p)),
+      );
+      toast.success(
+        archived ? t("toast.productRestored") : t("toast.productArchived"),
+      );
+      await revalidateStoreCache([CACHE_TAGS.products]);
+      router.refresh();
+    } finally {
+      setPendingAction(null);
     }
-    setProducts(
-      products.map((p) => (p.id === id ? { ...p, archived: !archived } : p)),
-    );
-    toast.success(
-      archived ? t("toast.productRestored") : t("toast.productArchived"),
-    );
-    router.refresh();
   };
 
   return (
@@ -187,26 +270,10 @@ export function ProductsTable({
                     </td>
                     <td className="p-4">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link href={`/admin/products/${product.id}/edit`}>
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() =>
-                            toggleArchive(product.id, product.archived)
-                          }
-                        >
-                          {product.archived ? (
-                            <ArchiveRestore className="h-4 w-4" />
-                          ) : (
-                            <Archive className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <DeleteProductDialog
+                        <ProductActions
                           product={product}
+                          pendingAction={pendingAction}
+                          onToggleArchive={toggleArchive}
                           onDelete={deleteProduct}
                           t={t}
                         />
@@ -251,24 +318,10 @@ export function ProductsTable({
                 </div>
 
                 <div className="flex justify-end gap-1 mt-3 border-t pt-3">
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link href={`/admin/products/${product.id}/edit`}>
-                      <Pencil className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => toggleArchive(product.id, product.archived)}
-                  >
-                    {product.archived ? (
-                      <ArchiveRestore className="h-4 w-4" />
-                    ) : (
-                      <Archive className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <DeleteProductDialog
+                  <ProductActions
                     product={product}
+                    pendingAction={pendingAction}
+                    onToggleArchive={toggleArchive}
                     onDelete={deleteProduct}
                     t={t}
                   />

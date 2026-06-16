@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
-  getProductBySlug,
-  getRelatedProducts,
-  getActiveDiscounts,
-  getStoreSettings,
-} from "@/lib/data/products";
+  getProductBySlugCached,
+  getRelatedProductsCached,
+  getActiveDiscountsCached,
+  getStoreSettingsCached,
+  incrementProductViewCount,
+} from "@/lib/data/store-cache";
 import { applyGlobalDiscount } from "@/lib/utils";
 import { ProductDetails } from "@/components/store/product-details";
 import { ProductSection } from "@/components/store/product-section";
@@ -19,7 +20,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { locale, slug } = await params;
-  const product = await getProductBySlug(slug);
+  const product = await getProductBySlugCached(slug);
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   if (!product) {
@@ -55,24 +56,27 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const nav = await getTranslations("nav");
 
   const [product, discounts, settings] = await Promise.all([
-    getProductBySlug(slug),
-    getActiveDiscounts(),
-    getStoreSettings(),
+    getProductBySlugCached(slug),
+    getActiveDiscountsCached(),
+    getStoreSettingsCached(),
   ]);
 
   if (!product) {
     notFound();
   }
 
+  // Fire-and-forget: don't block the page render on this.
+  void incrementProductViewCount(slug);
+
   const { finalPrice, badgeText } = applyGlobalDiscount(
     product.price,
     product.discount_price,
-    discounts
+    discounts,
   );
 
-  const relatedProducts = await getRelatedProducts(
+  const relatedProducts = await getRelatedProductsCached(
     product.id,
-    product.category_id
+    product.category_id,
   );
 
   const images = (product.product_images ?? [])

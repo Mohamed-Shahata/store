@@ -1,12 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
-  getStoreSettings,
-  getCategories,
-  getFeaturedProducts,
-  getNewArrivals,
-  getBestSellers,
-  getActiveDiscounts,
-} from "@/lib/data/products";
+  getStoreSettingsCached,
+  getCategoriesCached,
+  getFeaturedProductsCached,
+  getNewArrivalsCached,
+  getBestSellersCached,
+  getActiveDiscountsCached,
+} from "@/lib/data/store-cache";
 import { HeroSection } from "@/components/store/hero-section";
 import { CategoriesSection } from "@/components/store/categories-section";
 import {
@@ -32,12 +32,12 @@ export default async function HomePage({
 
   const [settings, categories, featured, newArrivals, bestSellers, discounts] =
     await Promise.all([
-      getStoreSettings(),
-      getCategories(),
-      getFeaturedProducts(),
-      getNewArrivals(),
-      getBestSellers(),
-      getActiveDiscounts(),
+      getStoreSettingsCached(),
+      getCategoriesCached(),
+      getFeaturedProductsCached(),
+      getNewArrivalsCached(),
+      getBestSellersCached(),
+      getActiveDiscountsCached(),
     ]);
 
   const banners = Array.isArray(settings?.banner_images)

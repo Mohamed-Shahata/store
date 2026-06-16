@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { getStoreSettings } from "@/lib/data/products";
+import { getStoreSettingsCached } from "@/lib/data/store-cache";
 import { CartPage } from "@/components/store/cart-page";
 
 export async function generateMetadata({
@@ -25,7 +25,7 @@ export default async function Cart({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const settings = await getStoreSettings();
+  const settings = await getStoreSettingsCached();
   const nav = await getTranslations("nav");
 
   return (

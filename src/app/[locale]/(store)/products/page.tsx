@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
-  getProducts,
-  getCategories,
-  getActiveDiscounts,
-} from "@/lib/data/products";
+  getProductsCached,
+  getCategoriesCached,
+  getActiveDiscountsCached,
+} from "@/lib/data/store-cache";
 import { ProductGrid } from "@/components/store/product-grid";
 import { Pagination } from "@/components/store/pagination";
 import { ProductsFilters } from "@/components/store/products-filters";
@@ -62,16 +62,20 @@ async function ProductsContent({
 }) {
   const page = parseInt(searchParams.page ?? "1", 10);
 
-  const { products, totalPages, currentPage } = await getProducts({
+  const { products, totalPages, currentPage } = await getProductsCached({
     search: searchParams.search,
     category: searchParams.category,
-    minPrice: searchParams.minPrice ? parseFloat(searchParams.minPrice) : undefined,
-    maxPrice: searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : undefined,
+    minPrice: searchParams.minPrice
+      ? parseFloat(searchParams.minPrice)
+      : undefined,
+    maxPrice: searchParams.maxPrice
+      ? parseFloat(searchParams.maxPrice)
+      : undefined,
     sort: searchParams.sort ?? "newest",
     page,
   });
 
-  const discounts = await getActiveDiscounts();
+  const discounts = await getActiveDiscountsCached();
 
   const filterParams: Record<string, string> = {};
   if (searchParams.search) filterParams.search = searchParams.search;
@@ -101,7 +105,7 @@ export default async function ProductsPage({
   setRequestLocale(locale);
 
   const resolvedParams = await searchParams;
-  const categories = await getCategories();
+  const categories = await getCategoriesCached();
   const t = await getTranslations("products");
 
   return (
@@ -113,7 +117,10 @@ export default async function ProductsPage({
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <Suspense fallback={<FiltersSkeleton />}>
-          <ProductsFilters categories={categories} currentParams={resolvedParams} />
+          <ProductsFilters
+            categories={categories}
+            currentParams={resolvedParams}
+          />
         </Suspense>
         <div>
           <Suspense fallback={<ProductsSkeleton />}>

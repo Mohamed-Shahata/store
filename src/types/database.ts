@@ -13,16 +13,19 @@ export interface Database {
         Row: {
           id: string;
           email: string;
+          is_super_admin: boolean;
           created_at: string;
         };
         Insert: {
           id: string;
           email: string;
+          is_super_admin?: boolean;
           created_at?: string;
         };
         Update: {
           id?: string;
           email?: string;
+          is_super_admin?: boolean;
           created_at?: string;
         };
         Relationships: [];
@@ -116,7 +119,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "categories";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       product_images: {
@@ -148,7 +151,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "products";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       discounts: {
@@ -267,7 +270,12 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      increment_product_view_count: {
+        Args: { product_slug: string };
+        Returns: void;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };
@@ -275,9 +283,11 @@ export interface Database {
 
 export type Category = Database["public"]["Tables"]["categories"]["Row"];
 export type Product = Database["public"]["Tables"]["products"]["Row"];
-export type ProductImage = Database["public"]["Tables"]["product_images"]["Row"];
+export type ProductImage =
+  Database["public"]["Tables"]["product_images"]["Row"];
 export type Discount = Database["public"]["Tables"]["discounts"]["Row"];
-export type StoreSettings = Database["public"]["Tables"]["store_settings"]["Row"];
+export type StoreSettings =
+  Database["public"]["Tables"]["store_settings"]["Row"];
 export type Order = Database["public"]["Tables"]["orders"]["Row"];
 
 export type ProductWithRelations = Product & {

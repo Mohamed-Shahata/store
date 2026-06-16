@@ -1,8 +1,8 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useCallback, useState } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { useCallback, useState, useTransition } from "react";
+import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,7 @@ export function ProductsFilters({
   const [search, setSearch] = useState(currentParams.search ?? "");
   const [minPrice, setMinPrice] = useState(currentParams.minPrice ?? "");
   const [maxPrice, setMaxPrice] = useState(currentParams.maxPrice ?? "");
+  const [isPending, startTransition] = useTransition();
 
   const updateFilters = useCallback(
     (updates: Record<string, string | undefined>) => {
@@ -51,9 +52,11 @@ export function ProductsFilters({
         }
       });
       params.delete("page");
-      router.push(`/products?${params.toString()}`);
+      startTransition(() => {
+        router.push(`/products?${params.toString()}`);
+      });
     },
-    [router, searchParams]
+    [router, searchParams],
   );
 
   const handleSearch = (e: React.FormEvent) => {
@@ -62,7 +65,9 @@ export function ProductsFilters({
   };
 
   const filterContent = (
-    <div className="space-y-6">
+    <div
+      className={`space-y-6 transition-opacity ${isPending ? "opacity-60" : ""}`}
+    >
       <form onSubmit={handleSearch}>
         <Label htmlFor="search" className="mb-2 block">
           {t("search")}
@@ -74,6 +79,7 @@ export function ProductsFilters({
             placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            disabled={isPending}
             className="ps-9"
           />
         </div>
@@ -123,6 +129,7 @@ export function ProductsFilters({
           variant="outline"
           size="sm"
           className="mt-2 w-full"
+          disabled={isPending}
           onClick={() =>
             updateFilters({
               minPrice: minPrice || undefined,
@@ -130,6 +137,7 @@ export function ProductsFilters({
             })
           }
         >
+          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
           {t("applyPrice")}
         </Button>
       </div>
@@ -156,13 +164,17 @@ export function ProductsFilters({
       <Button
         variant="ghost"
         className="w-full"
+        disabled={isPending}
         onClick={() => {
           setSearch("");
           setMinPrice("");
           setMaxPrice("");
-          router.push("/products");
+          startTransition(() => {
+            router.push("/products");
+          });
         }}
       >
+        {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
         {t("clearFilters")}
       </Button>
     </div>
@@ -181,7 +193,12 @@ export function ProductsFilters({
 
       <div className={`${mobileOpen ? "block" : "hidden"} lg:block`}>
         <div className="rounded-xl border bg-card p-6 sticky top-24">
-          <h2 className="font-semibold mb-4 hidden lg:block">{t("filters")}</h2>
+          <h2 className="font-semibold mb-4 hidden lg:flex items-center gap-2">
+            {t("filters")}
+            {isPending && (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+            )}
+          </h2>
           {filterContent}
         </div>
       </div>

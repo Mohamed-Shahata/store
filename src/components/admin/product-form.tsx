@@ -18,15 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { productSchema, type ProductFormData } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
+import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
 import { slugify } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Category, ProductWithRelations } from "@/types/database";
@@ -43,7 +39,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
   const [images, setImages] = useState<string[]>(
     product?.product_images
       ?.sort((a, b) => a.sort_order - b.sort_order)
-      .map((img) => img.image_url) ?? []
+      .map((img) => img.image_url) ?? [],
   );
 
   const {
@@ -117,7 +113,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
               product_id: product.id,
               image_url: url,
               sort_order: index,
-            }))
+            })),
           );
         }
 
@@ -137,13 +133,14 @@ export function ProductForm({ categories, product }: ProductFormProps) {
               product_id: newProduct.id,
               image_url: url,
               sort_order: index,
-            }))
+            })),
           );
         }
 
         toast.success(t("toast.productCreated"));
       }
 
+      await revalidateStoreCache([CACHE_TAGS.products]);
       router.push("/admin/products");
       router.refresh();
     } catch (err) {
@@ -164,7 +161,9 @@ export function ProductForm({ categories, product }: ProductFormProps) {
             <Label htmlFor="name">{t("fields.name")}</Label>
             <Input id="name" {...register("name")} />
             {errors.name && (
-              <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+              <p className="text-sm text-destructive mt-1">
+                {errors.name.message}
+              </p>
             )}
           </div>
           <div>
@@ -210,9 +209,16 @@ export function ProductForm({ categories, product }: ProductFormProps) {
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <div>
             <Label htmlFor="price">{t("priceEgp")}</Label>
-            <Input id="price" type="number" step="0.01" {...register("price", { valueAsNumber: true })} />
+            <Input
+              id="price"
+              type="number"
+              step="0.01"
+              {...register("price", { valueAsNumber: true })}
+            />
             {errors.price && (
-              <p className="text-sm text-destructive mt-1">{errors.price.message}</p>
+              <p className="text-sm text-destructive mt-1">
+                {errors.price.message}
+              </p>
             )}
           </div>
           <div>
