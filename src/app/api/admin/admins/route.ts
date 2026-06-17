@@ -25,7 +25,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ admins: data, currentAdminId: auth.userId });
+  return NextResponse.json({
+    admins: data,
+    currentAdminId: auth.userId,
+    isSuperAdmin: auth.isSuperAdmin,
+  });
 }
 
 export async function POST(request: Request) {
@@ -96,6 +100,13 @@ export async function DELETE(request: Request) {
 
   const auth = await requireAdminAuth(request);
   if (!auth.ok) return auth.response;
+
+  if (!auth.isSuperAdmin) {
+    return NextResponse.json(
+      { error: "Only the owner admin can remove admin accounts" },
+      { status: 403 },
+    );
+  }
 
   const body = await safeJson<{ id?: string }>(request);
   if (!body?.id) {

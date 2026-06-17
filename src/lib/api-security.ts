@@ -19,7 +19,10 @@ export function isAllowedOrigin(request: Request): boolean {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   if (siteUrl && origin === siteUrl) return true;
-  if (process.env.NODE_ENV === "development" && /^https?:\/\/localhost/.test(origin))
+  if (
+    process.env.NODE_ENV === "development" &&
+    /^https?:\/\/localhost/.test(origin)
+  )
     return true;
 
   return false;
@@ -34,12 +37,13 @@ export function originDeniedResponse() {
 // ---------------------------------------------------------------------------
 
 type AuthResult =
-  | { ok: true; userId: string }
+  | { ok: true; userId: string; isSuperAdmin: boolean }
   | { ok: false; response: NextResponse };
 
 /**
  * Verifies the incoming request is from a logged-in admin.
- * Returns the admin's userId on success, or a ready-to-return error response.
+ * Returns the admin's userId (and owner/super-admin status) on success,
+ * or a ready-to-return error response.
  */
 export async function requireAdminAuth(request: Request): Promise<AuthResult> {
   if (!isAllowedOrigin(request)) {
@@ -60,7 +64,7 @@ export async function requireAdminAuth(request: Request): Promise<AuthResult> {
 
   const { data: admin } = await supabase
     .from("admins")
-    .select("id")
+    .select("id, is_super_admin")
     .eq("id", user.id)
     .single();
 
@@ -71,7 +75,7 @@ export async function requireAdminAuth(request: Request): Promise<AuthResult> {
     };
   }
 
-  return { ok: true, userId: user.id };
+  return { ok: true, userId: user.id, isSuperAdmin: admin.is_super_admin };
 }
 
 // ---------------------------------------------------------------------------
@@ -109,7 +113,7 @@ const rateLimitStore = new Map<string, RateLimitEntry>();
 export function checkRateLimit(
   key: string,
   limit = 20,
-  windowMs = 60_000
+  windowMs = 60_000,
 ): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const entry = rateLimitStore.get(key);
@@ -130,7 +134,7 @@ export function checkRateLimit(
 export function rateLimitResponse() {
   return NextResponse.json(
     { error: "Too many requests. Please try again later." },
-    { status: 429 }
+    { status: 429 },
   );
 }
 

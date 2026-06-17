@@ -48,6 +48,9 @@ export function AdminsManager({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const t = useTranslations("admin");
 
+  const isCurrentSuperAdmin =
+    admins.find((a) => a.id === currentAdminId)?.is_super_admin ?? false;
+
   const {
     register,
     handleSubmit,
@@ -138,7 +141,8 @@ export function AdminsManager({
                 </p>
               </div>
             </div>
-            {admin.id !== currentAdminId &&
+            {isCurrentSuperAdmin &&
+              admin.id !== currentAdminId &&
               !admin.is_super_admin &&
               admins.length > 1 && (
                 <AlertDialog>
