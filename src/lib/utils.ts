@@ -16,7 +16,7 @@ export function formatPrice(price: number, currency = "EGP"): string {
 
 export function calculateDiscountPercentage(
   originalPrice: number,
-  discountedPrice: number
+  discountedPrice: number,
 ): number {
   if (originalPrice <= 0 || discountedPrice >= originalPrice) return 0;
   return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
@@ -24,7 +24,7 @@ export function calculateDiscountPercentage(
 
 export function getEffectivePrice(
   price: number,
-  discountPrice: number | null
+  discountPrice: number | null,
 ): number {
   if (discountPrice !== null && discountPrice < price) {
     return discountPrice;
@@ -57,7 +57,7 @@ export function formatWhatsAppNumber(number: string): string {
 
 export function generateWhatsAppUrl(
   phoneNumber: string,
-  message: string
+  message: string,
 ): string {
   const formatted = formatWhatsAppNumber(phoneNumber);
   return `https://wa.me/${formatted}?text=${encodeURIComponent(message)}`;
@@ -71,7 +71,9 @@ export function generateOrderMessage(
   }>,
   totalPrice: number,
   customerName: string,
+  customerAddress: string,
   customerPhone: string,
+  customerPhone2: string | undefined,
   labels: {
     greeting: string;
     orderIntro: string;
@@ -80,16 +82,22 @@ export function generateOrderMessage(
     price: string;
     totalPrice: string;
     customerName: string;
+    customerAddress: string;
     customerPhone: string;
+    customerPhone2: string;
     thankYou: string;
-  }
+  },
 ): string {
   const productLines = items
     .map(
       (item) =>
-        `• ${item.name}\n  ${labels.quantity}: ${item.quantity}\n  ${labels.price}: ${formatPrice(item.finalPrice * item.quantity)}`
+        `• ${item.name}\n  ${labels.quantity}: ${item.quantity}\n  ${labels.price}: ${formatPrice(item.finalPrice * item.quantity)}`,
     )
     .join("\n\n");
+
+  const phone2Line = customerPhone2
+    ? `\n\n${labels.customerPhone2}\n${customerPhone2}`
+    : "";
 
   return `${labels.greeting}
 
@@ -104,8 +112,11 @@ ${labels.totalPrice}: ${formatPrice(totalPrice)}
 ${labels.customerName}
 ${customerName}
 
+${labels.customerAddress}
+${customerAddress}
+
 ${labels.customerPhone}
-${customerPhone}
+${customerPhone}${phone2Line}
 
 ${labels.thankYou}`;
 }
@@ -113,7 +124,7 @@ ${labels.thankYou}`;
 export function getPaginationRange(
   currentPage: number,
   totalPages: number,
-  maxVisible = 5
+  maxVisible = 5,
 ): number[] {
   if (totalPages <= maxVisible) {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
@@ -140,7 +151,7 @@ export function applyGlobalDiscount(
     type: "percentage" | "fixed";
     value: number;
     badge_text: string | null;
-  }>
+  }>,
 ): { finalPrice: number; badgeText: string | null } {
   let finalPrice = getEffectivePrice(price, discountPrice);
   let badgeText: string | null = null;

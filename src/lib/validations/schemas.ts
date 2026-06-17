@@ -77,15 +77,33 @@ export const storeSettingsSchema = z.object({
 
 export const getCheckoutSchema = (messages: {
   nameRequired: string;
+  nameInvalid: string;
+  addressRequired: string;
   phoneRequired: string;
   phoneInvalid: string;
+  phone2Invalid: string;
 }) =>
   z.object({
-    customer_name: z.string().min(2, messages.nameRequired),
+    customer_name: z
+      .string()
+      .min(2, messages.nameRequired)
+      .refine(
+        (value) => value.trim().split(/\s+/).filter(Boolean).length >= 3,
+        messages.nameInvalid,
+      ),
+    customer_address: z.string().min(5, messages.addressRequired),
     customer_phone: z
       .string()
       .min(10, messages.phoneRequired)
       .regex(/^[0-9+\-\s()]+$/, messages.phoneInvalid),
+    customer_phone_2: z
+      .string()
+      .optional()
+      .or(z.literal(""))
+      .refine(
+        (value) => !value || /^[0-9+\-\s()]+$/.test(value),
+        messages.phone2Invalid,
+      ),
   });
 
 export type CheckoutFormData = z.infer<ReturnType<typeof getCheckoutSchema>>;

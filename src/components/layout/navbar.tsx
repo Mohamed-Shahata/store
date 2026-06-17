@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Search, ShoppingBag, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -24,7 +24,17 @@ export function Navbar({ settings }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const totalItems = useCartStore((s) => s.getTotalItems());
+  const cartStore = useCartStore();
+  const [totalItems, setTotalItems] = useState(0);
+
+  useEffect(() => {
+    // Rehydrate the store from localStorage after mount
+    useCartStore.persist.rehydrate();
+  }, []);
+
+  useEffect(() => {
+    setTotalItems(cartStore.getTotalItems());
+  }, [cartStore.items]);
 
   const navLinks = [
     { href: "/", label: t("home") },
@@ -69,7 +79,9 @@ export function Navbar({ settings }: NavbarProps) {
               href={link.href}
               className={cn(
                 "text-sm font-medium transition-colors hover:text-primary",
-                isActive(link.href) ? "text-foreground" : "text-muted-foreground"
+                isActive(link.href)
+                  ? "text-foreground"
+                  : "text-muted-foreground",
               )}
             >
               {link.label}
@@ -108,7 +120,11 @@ export function Navbar({ settings }: NavbarProps) {
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={t("menu")}
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </Button>
         </div>
       </div>
@@ -121,7 +137,10 @@ export function Navbar({ settings }: NavbarProps) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden border-t"
           >
-            <form onSubmit={handleSearch} className="container mx-auto px-4 py-3">
+            <form
+              onSubmit={handleSearch}
+              className="container mx-auto px-4 py-3"
+            >
               <Input
                 placeholder={t("searchPlaceholder")}
                 value={searchQuery}
@@ -151,7 +170,7 @@ export function Navbar({ settings }: NavbarProps) {
                     "rounded-md px-3 py-2 text-sm font-medium",
                     isActive(link.href)
                       ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent"
+                      : "text-muted-foreground hover:bg-accent",
                   )}
                 >
                   {link.label}

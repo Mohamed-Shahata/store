@@ -21,11 +21,17 @@ const orderItemSchema = z.object({
 
 const createOrderSchema = z.object({
   customer_name: z.string().min(1, "Name is required").max(200),
+  customer_address: z.string().min(1, "Address is required").max(500),
   customer_phone: z
     .string()
     .min(6, "Phone is required")
     .max(30)
     .regex(/^[+\d\s\-()]+$/, "Invalid phone number"),
+  customer_phone_2: z
+    .string()
+    .max(30)
+    .regex(/^[+\d\s\-()]+$/, "Invalid phone number")
+    .optional(),
   items: z.array(orderItemSchema).min(1).max(100),
   total_price: z.number().positive(),
 });
@@ -55,13 +61,22 @@ export async function POST(request: Request) {
     );
   }
 
-  const { customer_name, customer_phone, items, total_price } = parsed.data;
+  const {
+    customer_name,
+    customer_address,
+    customer_phone,
+    customer_phone_2,
+    items,
+    total_price,
+  } = parsed.data;
 
   try {
     const supabase = await createClient();
     const order: OrderInsert = {
       customer_name,
+      customer_address,
       customer_phone,
+      customer_phone_2: customer_phone_2 ?? null,
       items,
       total_price,
       status: "sent",

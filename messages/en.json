@@ -71,8 +71,12 @@
     "total": "Total",
     "savingMessage": "You're saving with applied discounts!",
     "yourName": "Your Name",
-    "namePlaceholder": "Enter your name",
+    "namePlaceholder": "Full name (first, middle, last)",
+    "yourAddress": "Your Address",
+    "addressPlaceholder": "Enter your full address",
     "yourPhone": "Your Phone",
+    "yourPhone2": "Additional Phone",
+    "optional": "optional",
     "phonePlaceholder": "01xxxxxxxxx",
     "orderWhatsApp": "Order Now via WhatsApp",
     "whatsappHint": "You'll be redirected to WhatsApp to complete your order with {storeName}.",
@@ -103,8 +107,11 @@
   },
   "validation": {
     "nameRequired": "Name is required",
+    "nameInvalid": "Please enter your full name (first, middle, and last)",
+    "addressRequired": "Address is required",
     "phoneRequired": "Valid phone number is required",
-    "phoneInvalid": "Invalid phone number"
+    "phoneInvalid": "Invalid phone number",
+    "phone2Invalid": "Invalid phone number"
   },
   "whatsapp": {
     "greeting": "Hello,",
@@ -114,7 +121,9 @@
     "price": "Price",
     "totalPrice": "Total Price",
     "customerName": "Customer Name:",
+    "customerAddress": "Address:",
     "customerPhone": "Customer Phone:",
+    "customerPhone2": "Additional Phone:",
     "thankYou": "Thank You."
   },
   "language": {

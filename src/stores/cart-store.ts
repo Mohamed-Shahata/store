@@ -29,11 +29,11 @@ export const useCartStore = create<CartStore>()(
           if (existing) {
             const newQty = Math.min(
               existing.quantity + quantity,
-              item.stockQuantity
+              item.stockQuantity,
             );
             return {
               items: state.items.map((i) =>
-                i.id === item.id ? { ...i, quantity: newQty } : i
+                i.id === item.id ? { ...i, quantity: newQty } : i,
               ),
             };
           }
@@ -43,7 +43,9 @@ export const useCartStore = create<CartStore>()(
               ...state.items,
               {
                 ...item,
-                finalPrice: item.finalPrice ?? getEffectivePrice(item.price, item.discountPrice),
+                finalPrice:
+                  item.finalPrice ??
+                  getEffectivePrice(item.price, item.discountPrice),
                 quantity: Math.min(quantity, item.stockQuantity),
               },
             ],
@@ -81,19 +83,20 @@ export const useCartStore = create<CartStore>()(
       getSubtotal: () => {
         return get().items.reduce(
           (sum, item) => sum + item.price * item.quantity,
-          0
+          0,
         );
       },
 
       getTotal: () => {
         return get().items.reduce(
           (sum, item) => sum + item.finalPrice * item.quantity,
-          0
+          0,
         );
       },
     }),
     {
       name: "store-cart",
-    }
-  )
+      skipHydration: true,
+    },
+  ),
 );

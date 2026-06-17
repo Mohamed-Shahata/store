@@ -39,10 +39,13 @@ export function CartPage({ whatsappNumber, storeName }: CartPageProps) {
     () =>
       getCheckoutSchema({
         nameRequired: tValidation("nameRequired"),
+        nameInvalid: tValidation("nameInvalid"),
+        addressRequired: tValidation("addressRequired"),
         phoneRequired: tValidation("phoneRequired"),
         phoneInvalid: tValidation("phoneInvalid"),
+        phone2Invalid: tValidation("phone2Invalid"),
       }),
-    [tValidation]
+    [tValidation],
   );
 
   const {
@@ -70,7 +73,9 @@ export function CartPage({ whatsappNumber, storeName }: CartPageProps) {
       })),
       total,
       data.customer_name,
+      data.customer_address,
       data.customer_phone,
+      data.customer_phone_2,
       {
         greeting: tWhatsapp("greeting"),
         orderIntro: tWhatsapp("orderIntro"),
@@ -79,9 +84,11 @@ export function CartPage({ whatsappNumber, storeName }: CartPageProps) {
         price: tWhatsapp("price"),
         totalPrice: tWhatsapp("totalPrice"),
         customerName: tWhatsapp("customerName"),
+        customerAddress: tWhatsapp("customerAddress"),
         customerPhone: tWhatsapp("customerPhone"),
+        customerPhone2: tWhatsapp("customerPhone2"),
         thankYou: tWhatsapp("thankYou"),
-      }
+      },
     );
 
     try {
@@ -90,7 +97,9 @@ export function CartPage({ whatsappNumber, storeName }: CartPageProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customer_name: data.customer_name,
+          customer_address: data.customer_address,
           customer_phone: data.customer_phone,
+          customer_phone_2: data.customer_phone_2 || undefined,
           items: items.map((item) => ({
             id: item.id,
             name: item.name,
@@ -250,6 +259,19 @@ export function CartPage({ whatsappNumber, storeName }: CartPageProps) {
               )}
             </div>
             <div>
+              <Label htmlFor="customer_address">{t("yourAddress")}</Label>
+              <Input
+                id="customer_address"
+                placeholder={t("addressPlaceholder")}
+                {...register("customer_address")}
+              />
+              {errors.customer_address && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.customer_address.message}
+                </p>
+              )}
+            </div>
+            <div>
               <Label htmlFor="customer_phone">{t("yourPhone")}</Label>
               <Input
                 id="customer_phone"
@@ -259,6 +281,22 @@ export function CartPage({ whatsappNumber, storeName }: CartPageProps) {
               {errors.customer_phone && (
                 <p className="text-sm text-destructive mt-1">
                   {errors.customer_phone.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="customer_phone_2">
+                {t("yourPhone2")}{" "}
+                <span className="text-muted-foreground">({t("optional")})</span>
+              </Label>
+              <Input
+                id="customer_phone_2"
+                placeholder={t("phonePlaceholder")}
+                {...register("customer_phone_2")}
+              />
+              {errors.customer_phone_2 && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.customer_phone_2.message}
                 </p>
               )}
             </div>

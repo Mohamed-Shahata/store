@@ -242,7 +242,9 @@ export interface Database {
         Row: {
           id: string;
           customer_name: string;
+          customer_address: string;
           customer_phone: string;
+          customer_phone_2: string | null;
           items: Json;
           total_price: number;
           status: string;
@@ -251,7 +253,9 @@ export interface Database {
         Insert: {
           id?: string;
           customer_name: string;
+          customer_address: string;
           customer_phone: string;
+          customer_phone_2?: string | null;
           items: Json;
           total_price: number;
           status?: string;
@@ -260,7 +264,9 @@ export interface Database {
         Update: {
           id?: string;
           customer_name?: string;
+          customer_address?: string;
           customer_phone?: string;
+          customer_phone_2?: string | null;
           items?: Json;
           total_price?: number;
           status?: string;

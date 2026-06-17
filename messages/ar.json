@@ -71,8 +71,12 @@
     "total": "الإجمالي",
     "savingMessage": "أنت توفّر بفضل الخصومات المطبقة!",
     "yourName": "اسمك",
-    "namePlaceholder": "أدخل اسمك",
+    "namePlaceholder": "الاسم بالكامل (ثلاثي)",
+    "yourAddress": "عنوانك",
+    "addressPlaceholder": "أدخل عنوانك بالتفصيل",
     "yourPhone": "رقم هاتفك",
+    "yourPhone2": "رقم هاتف إضافي",
+    "optional": "اختياري",
     "phonePlaceholder": "01xxxxxxxxx",
     "orderWhatsApp": "اطلب الآن عبر واتساب",
     "whatsappHint": "سيتم تحويلك إلى واتساب لإتمام طلبك مع {storeName}.",
@@ -103,8 +107,11 @@
   },
   "validation": {
     "nameRequired": "الاسم مطلوب",
+    "nameInvalid": "يرجى إدخال الاسم بالكامل (ثلاثي على الأقل)",
+    "addressRequired": "العنوان مطلوب",
     "phoneRequired": "رقم هاتف صحيح مطلوب",
-    "phoneInvalid": "رقم هاتف غير صالح"
+    "phoneInvalid": "رقم هاتف غير صالح",
+    "phone2Invalid": "رقم هاتف غير صالح"
   },
   "whatsapp": {
     "greeting": "مرحباً،",
@@ -114,7 +121,9 @@
     "price": "السعر",
     "totalPrice": "السعر الإجمالي",
     "customerName": "اسم العميل:",
+    "customerAddress": "العنوان:",
     "customerPhone": "هاتف العميل:",
+    "customerPhone2": "هاتف إضافي:",
     "thankYou": "شكراً لك."
   },
   "language": {
