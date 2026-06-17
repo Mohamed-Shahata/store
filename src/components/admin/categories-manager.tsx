@@ -32,7 +32,8 @@ import {
   type CategoryFormData,
 } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
-import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
+import { revalidateStoreCache } from "@/lib/actions/revalidate";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { slugify } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Category } from "@/types/database";
@@ -250,6 +251,11 @@ export function CategoriesManager({
             <div>
               <Label htmlFor="slug">{t("fields.slug")}</Label>
               <Input id="slug" {...register("slug")} />
+              {errors.slug && (
+                <p className="text-sm text-destructive mt-1">
+                  {errors.slug.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="icon">{t("fields.icon")}</Label>

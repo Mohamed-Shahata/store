@@ -280,6 +280,12 @@
     "addedOn": "أُضيف في",
     "openMenu": "فتح القائمة",
     "closeMenu": "إغلاق القائمة",
-    "superAdmin": "الأدمن الرئيسي"
+    "superAdmin": "الأدمن الرئيسي",
+    "validation": {
+      "categoryRequired": "يجب اختيار تصنيف للمنتج",
+      "imageRequired": "يجب إضافة صورة واحدة على الأقل",
+      "descriptionRequired": "يجب إدخال وصف للمنتج",
+      "priceRequired": "يجب إدخال سعر أكبر من الصفر"
+    }
   }
 }

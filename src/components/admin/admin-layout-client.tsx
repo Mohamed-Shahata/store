@@ -9,6 +9,7 @@ import {
   AdminSidebarNav,
 } from "@/components/admin/admin-sidebar";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +72,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <LanguageSwitcher />
+          </div>
         </div>
         <main className="flex-1 min-w-0 p-4 md:p-8">{children}</main>
       </div>

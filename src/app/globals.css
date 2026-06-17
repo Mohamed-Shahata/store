@@ -112,3 +112,19 @@ body[data-scroll-locked] {
     text-wrap: balance;
   }
 }
+
+/* أي عنصر قابل للنقر يبقى عليه شكل اليد (pointer) عند الوقوف بالماوس،
+   حتى لو حد نسي يضيف cursor-pointer كـ className. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a,
+label,
+select,
+summary,
+input[type="checkbox"],
+input[type="radio"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+  cursor: pointer;
+}

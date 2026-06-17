@@ -22,7 +22,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { productSchema, type ProductFormData } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
-import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
+import { revalidateStoreCache } from "@/lib/actions/revalidate";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { slugify } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Category, ProductWithRelations } from "@/types/database";
@@ -47,6 +48,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
     handleSubmit,
     control,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -58,7 +60,8 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           price: product.price,
           discount_price: product.discount_price,
           stock_quantity: product.stock_quantity,
-          category_id: product.category_id,
+          category_id: product.category_id ?? undefined,
+          images: product.product_images?.map((img) => img.image_url) ?? [],
           featured: product.featured,
           best_seller: product.best_seller,
           new_arrival: product.new_arrival,
@@ -72,6 +75,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           active: true,
           archived: false,
           stock_quantity: 0,
+          images: [],
         },
   });
 
@@ -82,15 +86,35 @@ export function ProductForm({ categories, product }: ProductFormProps) {
     name: ["featured", "best_seller", "new_arrival", "active", "archived"],
   });
 
+  const handleImagesChange = (newImages: string[]) => {
+    setImages(newImages);
+    setValue("images", newImages, { shouldValidate: true });
+  };
+
   const onSubmit = async (data: ProductFormData) => {
+    if (!data.category_id) {
+      setError("category_id", { message: "Category is required" });
+      return;
+    }
     setLoading(true);
     const supabase = createClient();
 
     const productData = {
-      ...data,
+      name: data.name,
       slug: data.slug || slugify(data.name),
-      category_id: data.category_id || null,
-      discount_price: data.discount_price || null,
+      description: data.description,
+      price: data.price,
+      discount_price:
+        data.discount_price && !isNaN(data.discount_price)
+          ? data.discount_price
+          : null,
+      stock_quantity: data.stock_quantity,
+      category_id: data.category_id,
+      featured: data.featured,
+      best_seller: data.best_seller,
+      new_arrival: data.new_arrival,
+      active: data.active,
+      archived: data.archived,
     };
 
     try {
@@ -155,14 +179,19 @@ export function ProductForm({ categories, product }: ProductFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl">
+    <form
+      onSubmit={handleSubmit(onSubmit, (validationErrors) => {
+        console.log("❌ VALIDATION FAILED:", validationErrors);
+      })}
+      className="space-y-6 max-w-3xl"
+    >
       <Card>
         <CardHeader>
           <CardTitle>{t("basicInformation")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="name">{t("fields.name")}</Label>
+            <Label htmlFor="name">{t("fields.name")} *</Label>
             <Input id="name" {...register("name")} />
             {errors.name && (
               <p className="text-sm text-destructive mt-1">
@@ -177,24 +206,39 @@ export function ProductForm({ categories, product }: ProductFormProps) {
               placeholder={name ? slugify(name) : "product-slug"}
               {...register("slug")}
             />
+            {errors.slug && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.slug.message}
+              </p>
+            )}
           </div>
           <div>
-            <Label htmlFor="description">{t("fields.description")}</Label>
+            <Label htmlFor="description">{t("fields.description")} *</Label>
             <Textarea id="description" rows={4} {...register("description")} />
+            {errors.description && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.description.message}
+              </p>
+            )}
           </div>
           <div>
-            <Label>{t("category")}</Label>
+            <Label>{t("category")} *</Label>
             <Select
-              value={categoryId ?? "none"}
-              onValueChange={(v) =>
-                setValue("category_id", v === "none" ? null : v)
-              }
+              value={categoryId ?? ""}
+              onValueChange={(v) => {
+                setValue("category_id", v, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                  shouldTouch: true,
+                });
+              }}
             >
-              <SelectTrigger>
+              <SelectTrigger
+                className={errors.category_id ? "border-destructive" : ""}
+              >
                 <SelectValue placeholder={t("selectCategory")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">{t("noCategory")}</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}
@@ -202,6 +246,11 @@ export function ProductForm({ categories, product }: ProductFormProps) {
                 ))}
               </SelectContent>
             </Select>
+            {errors.category_id && (
+              <p className="text-sm text-destructive mt-1">
+                {t("validation.categoryRequired")}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -212,7 +261,7 @@ export function ProductForm({ categories, product }: ProductFormProps) {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <div>
-            <Label htmlFor="price">{t("priceEgp")}</Label>
+            <Label htmlFor="price">{t("priceEgp")} *</Label>
             <Input
               id="price"
               type="number"
@@ -235,22 +284,36 @@ export function ProductForm({ categories, product }: ProductFormProps) {
             />
           </div>
           <div>
-            <Label htmlFor="stock_quantity">{t("stockQuantity")}</Label>
+            <Label htmlFor="stock_quantity">{t("stockQuantity")} *</Label>
             <Input
               id="stock_quantity"
               type="number"
               {...register("stock_quantity", { valueAsNumber: true })}
             />
+            {errors.stock_quantity && (
+              <p className="text-sm text-destructive mt-1">
+                {errors.stock_quantity.message}
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("images")}</CardTitle>
+          <CardTitle>{t("images")} *</CardTitle>
         </CardHeader>
         <CardContent>
-          <ImageUpload images={images} onChange={setImages} maxImages={8} />
+          <ImageUpload
+            images={images}
+            onChange={handleImagesChange}
+            maxImages={8}
+          />
+          {errors.images && (
+            <p className="text-sm text-destructive mt-2">
+              {t("validation.imageRequired")}
+            </p>
+          )}
         </CardContent>
       </Card>
 

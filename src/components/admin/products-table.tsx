@@ -26,7 +26,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { createClient } from "@/lib/supabase/client";
 import { formatPrice } from "@/lib/utils";
-import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
+import { revalidateStoreCache } from "@/lib/actions/revalidate";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { toast } from "sonner";
 import type { ProductWithRelations } from "@/types/database";
 

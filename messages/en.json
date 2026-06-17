@@ -280,6 +280,12 @@
     "addedOn": "Added on",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "superAdmin": "Super Admin"
+    "superAdmin": "Super Admin",
+    "validation": {
+      "categoryRequired": "A category is required for this product",
+      "imageRequired": "At least one image is required",
+      "descriptionRequired": "A description is required",
+      "priceRequired": "Price must be greater than 0"
+    }
   }
 }

@@ -41,7 +41,8 @@ import {
   type DiscountFormData,
 } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
-import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
+import { revalidateStoreCache } from "@/lib/actions/revalidate";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { isDiscountActive } from "@/lib/utils";
 import { toast } from "sonner";
 import type { Discount } from "@/types/database";

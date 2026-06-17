@@ -20,7 +20,8 @@ import {
   type StoreSettingsFormData,
 } from "@/lib/validations/schemas";
 import { createClient } from "@/lib/supabase/client";
-import { revalidateStoreCache, CACHE_TAGS } from "@/lib/actions/revalidate";
+import { revalidateStoreCache } from "@/lib/actions/revalidate";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { toast } from "sonner";
 import type { StoreSettings } from "@/types/database";
 

@@ -7,19 +7,33 @@ export const loginSchema = z.object({
 
 export const categorySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters"),
+  slug: z
+    .string()
+    .min(2, "Slug must be at least 2 characters")
+    .optional()
+    .or(z.literal("")),
   description: z.string().optional(),
   icon: z.string().optional(),
 });
 
 export const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug must be at least 2 characters"),
-  description: z.string().optional(),
-  price: z.number().min(0, "Price must be positive"),
-  discount_price: z.number().min(0).nullable().optional(),
+  slug: z
+    .string()
+    .min(2, "Slug must be at least 2 characters")
+    .optional()
+    .or(z.literal("")),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  price: z.number().min(0.01, "Price must be greater than 0"),
+  discount_price: z
+    .number()
+    .min(0)
+    .nullable()
+    .optional()
+    .or(z.nan().transform(() => null)),
   stock_quantity: z.number().int().min(0, "Stock must be non-negative"),
-  category_id: z.string().uuid().optional().nullable(),
+  category_id: z.string().min(1, "Category is required").optional(),
+  images: z.array(z.string()).min(1, "At least one image is required"),
   featured: z.boolean(),
   best_seller: z.boolean(),
   new_arrival: z.boolean(),
