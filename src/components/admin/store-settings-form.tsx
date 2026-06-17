@@ -62,28 +62,34 @@ export function StoreSettingsForm({ settings }: StoreSettingsFormProps) {
     setLoading(true);
     const supabase = createClient();
 
-    const { error } = await supabase
-      .from("store_settings")
-      .update({
-        ...data,
-        logo,
-        banner_images: banners,
-        facebook_url: data.facebook_url || null,
-        instagram_url: data.instagram_url || null,
-        tiktok_url: data.tiktok_url || null,
-      })
-      .eq("id", settings.id);
+    try {
+      const { data: updated, error } = await supabase
+        .from("store_settings")
+        .update({
+          ...data,
+          logo,
+          banner_images: banners,
+          facebook_url: data.facebook_url || null,
+          instagram_url: data.instagram_url || null,
+          tiktok_url: data.tiktok_url || null,
+        })
+        .eq("id", settings.id)
+        .select();
 
-    if (error) {
-      toast.error(error.message);
+      if (error) throw error;
+
+      if (!updated || updated.length === 0) {
+        throw new Error(t("toast.permissionDenied"));
+      }
+
+      toast.success(t("toast.settingsSaved"));
+      await revalidateStoreCache([CACHE_TAGS.settings]);
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("toast.genericError"));
+    } finally {
       setLoading(false);
-      return;
     }
-
-    toast.success(t("toast.settingsSaved"));
-    await revalidateStoreCache([CACHE_TAGS.settings]);
-    router.refresh();
-    setLoading(false);
   };
 
   return (

@@ -258,6 +258,7 @@
       "uploadFailed": "فشل الرفع",
       "maxImages": "الحد الأقصى {count} صور",
       "genericError": "حدث خطأ ما",
+      "permissionDenied": "فشل الحفظ: حسابك ليس له صلاحية تعديل كأدمن (تأكد إنك مضاف في جدول admins)، أو السجل ده غير موجود.",
       "adminCreated": "تم إضافة المشرف بنجاح",
       "adminDeleted": "تم إزالة المشرف",
       "credentialsUpdated": "تم تحديث بيانات الدخول. سجّل الدخول مرة أخرى.",

@@ -83,12 +83,17 @@ export function CategoriesManager({
     const payload = { ...data, slug: data.slug || slugify(data.name) };
 
     if (editing) {
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from("categories")
         .update(payload)
-        .eq("id", editing.id);
+        .eq("id", editing.id)
+        .select();
       if (error) {
         toast.error(error.message);
+        return;
+      }
+      if (!updated || updated.length === 0) {
+        toast.error(t("toast.permissionDenied"));
         return;
       }
       setCategories(

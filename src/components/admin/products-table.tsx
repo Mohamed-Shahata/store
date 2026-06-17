@@ -191,12 +191,17 @@ export function ProductsTable({
     setPendingAction({ id, action: "archive" });
     try {
       const supabase = createClient();
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from("products")
         .update({ archived: !archived })
-        .eq("id", id);
+        .eq("id", id)
+        .select();
       if (error) {
         toast.error(error.message);
+        return;
+      }
+      if (!updated || updated.length === 0) {
+        toast.error(t("toast.permissionDenied"));
         return;
       }
       setProducts(

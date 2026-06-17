@@ -258,6 +258,7 @@
       "uploadFailed": "Upload failed",
       "maxImages": "Maximum {count} images allowed",
       "genericError": "Something went wrong",
+      "permissionDenied": "Save failed: your account doesn't have admin write access (check the admins table), or this record no longer exists.",
       "adminCreated": "Admin added successfully",
       "adminDeleted": "Admin removed",
       "credentialsUpdated": "Credentials updated. Please sign in again.",

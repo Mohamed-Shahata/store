@@ -95,12 +95,16 @@ export function ProductForm({ categories, product }: ProductFormProps) {
 
     try {
       if (product) {
-        const { error } = await supabase
+        const { data: updated, error } = await supabase
           .from("products")
           .update(productData)
-          .eq("id", product.id);
+          .eq("id", product.id)
+          .select();
 
         if (error) throw error;
+        if (!updated || updated.length === 0) {
+          throw new Error(t("toast.permissionDenied"));
+        }
 
         await supabase
           .from("product_images")
