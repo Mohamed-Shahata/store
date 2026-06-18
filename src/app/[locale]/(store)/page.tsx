@@ -47,8 +47,9 @@ export default async function HomePage({
       <HeroSection
         storeName={settings?.store_name ?? nav("premiumStore")}
         description={settings?.store_description}
+        bannerImages={banners}
       />
-      <PromoSlider banners={banners} discounts={discounts} />
+      {discounts.length > 0 && <PromoSlider banners={[]} discounts={discounts} />}
       <CategoriesSection categories={categories} />
       <ProductSection
         title={t("featuredProducts")}

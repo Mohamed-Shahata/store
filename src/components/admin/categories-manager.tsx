@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -31,7 +32,6 @@ import {
   categorySchema,
   type CategoryFormData,
 } from "@/lib/validations/schemas";
-import { createClient } from "@/lib/supabase/client";
 import { revalidateStoreCache } from "@/lib/actions/revalidate";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import { slugify } from "@/lib/utils";
@@ -80,38 +80,43 @@ export function CategoriesManager({
   };
 
   const onSubmit = async (data: CategoryFormData) => {
-    const supabase = createClient();
     const payload = { ...data, slug: data.slug || slugify(data.name) };
 
     if (editing) {
-      const { data: updated, error } = await supabase
-        .from("categories")
-        .update(payload)
-        .eq("id", editing.id)
-        .select();
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-      if (!updated || updated.length === 0) {
-        toast.error(t("toast.permissionDenied"));
+      const response = await fetch("/api/admin/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editing.id, ...payload }),
+      });
+      const result = (await response.json().catch(() => null)) as {
+        category?: Category;
+        error?: string;
+      } | null;
+
+      if (!response.ok || !result?.category) {
+        toast.error(result?.error ?? t("toast.genericError"));
         return;
       }
       setCategories(
-        categories.map((c) => (c.id === editing.id ? { ...c, ...payload } : c)),
+        categories.map((c) => (c.id === editing.id ? result.category! : c)),
       );
       toast.success(t("toast.categoryUpdated"));
     } else {
-      const { data: newCat, error } = await supabase
-        .from("categories")
-        .insert(payload)
-        .select()
-        .single();
-      if (error) {
-        toast.error(error.message);
+      const response = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = (await response.json().catch(() => null)) as {
+        category?: Category;
+        error?: string;
+      } | null;
+
+      if (!response.ok || !result?.category) {
+        toast.error(result?.error ?? t("toast.genericError"));
         return;
       }
-      setCategories([...categories, newCat]);
+      setCategories([...categories, result.category]);
       toast.success(t("toast.categoryCreated"));
     }
 
@@ -123,10 +128,16 @@ export function CategoriesManager({
   const deleteCategory = async (id: string) => {
     setDeletingId(id);
     try {
-      const supabase = createClient();
-      const { error } = await supabase.from("categories").delete().eq("id", id);
-      if (error) {
-        toast.error(error.message);
+      const response = await fetch("/api/admin/categories", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!response.ok) {
+        const result = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        toast.error(result?.error ?? t("toast.genericError"));
         return;
       }
       setCategories(categories.filter((c) => c.id !== id));
@@ -230,6 +241,9 @@ export function CategoriesManager({
             <DialogTitle>
               {editing ? t("editCategory") : t("addCategory")}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              {editing ? t("editCategory") : t("addCategory")}
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>

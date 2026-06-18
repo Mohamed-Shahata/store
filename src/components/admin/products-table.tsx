@@ -173,12 +173,20 @@ export function ProductsTable({
   const deleteProduct = async (id: string) => {
     setPendingAction({ id, action: "delete" });
     try {
-      const supabase = createClient();
-      const { error } = await supabase.from("products").delete().eq("id", id);
-      if (error) {
-        toast.error(error.message);
+      const response = await fetch("/api/admin/products", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) {
+        const result = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        toast.error(result?.error ?? t("toast.permissionDenied"));
         return;
       }
+
       setProducts(products.filter((p) => p.id !== id));
       toast.success(t("toast.productDeleted"));
       await revalidateStoreCache([CACHE_TAGS.products]);

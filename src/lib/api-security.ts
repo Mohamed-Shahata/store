@@ -18,10 +18,12 @@ export function isAllowedOrigin(request: Request): boolean {
   if (!origin) return true;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const requestOrigin = new URL(request.url).origin;
   if (siteUrl && origin === siteUrl) return true;
+  if (origin === requestOrigin) return true;
   if (
     process.env.NODE_ENV === "development" &&
-    /^https?:\/\/localhost/.test(origin)
+    /^https?:\/\/(localhost|127\.0\.0\.1)/.test(origin)
   )
     return true;
 
@@ -62,7 +64,8 @@ export async function requireAdminAuth(request: Request): Promise<AuthResult> {
     };
   }
 
-  const { data: admin } = await supabase
+  const serviceClient = createServiceClient();
+  const { data: admin } = await serviceClient
     .from("admins")
     .select("id, is_super_admin")
     .eq("id", user.id)
@@ -71,7 +74,13 @@ export async function requireAdminAuth(request: Request): Promise<AuthResult> {
   if (!admin) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+      response: NextResponse.json(
+        {
+          error:
+            "Forbidden: this logged-in user is not registered in the admins table.",
+        },
+        { status: 403 },
+      ),
     };
   }
 

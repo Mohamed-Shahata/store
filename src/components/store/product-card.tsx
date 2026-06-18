@@ -58,13 +58,14 @@ export function ProductCard({
 
   return (
     <motion.div
+      className="h-full"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
     >
-      <Link href={`/products/${product.slug}`} className="group block">
-        <div className="relative overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-lg">
+      <Link href={`/products/${product.slug}`} className="group block h-full">
+        <div className="relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-lg sm:min-h-[390px]">
           <div className="relative aspect-square overflow-hidden bg-muted">
             {mainImage ? (
               <Image
@@ -99,16 +100,17 @@ export function ProductCard({
               <ShoppingBag className="h-4 w-4" />
             </Button>
           </div>
-          <div className="p-4">
+          <div className="flex flex-1 flex-col p-4">
             {product.category && (
-              <p className="text-xs text-muted-foreground mb-1">
+              <p className="mb-1 min-h-4 truncate text-xs text-muted-foreground">
                 {product.category.name}
               </p>
             )}
-            <h3 className="font-medium line-clamp-2 group-hover:underline">
+            {!product.category && <div className="mb-1 min-h-4" />}
+            <h3 className="min-h-12 font-medium line-clamp-2 group-hover:underline">
               {product.name}
             </h3>
-            <div className="mt-2 flex items-center gap-2">
+            <div className="mt-auto flex items-center gap-2 pt-3">
               <span className="font-bold">{formatPrice(effectiveFinalPrice)}</span>
               {hasDiscount && (
                 <span className="text-sm text-muted-foreground line-through">
