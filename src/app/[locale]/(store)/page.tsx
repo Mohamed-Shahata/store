@@ -1,0 +1,74 @@
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getStoreSettingsCached,
+  getCategoriesCached,
+  getFeaturedProductsCached,
+  getNewArrivalsCached,
+  getBestSellersCached,
+  getActiveDiscountsCached,
+} from "@/lib/data/store-cache";
+import { HeroSection } from "@/components/store/hero-section";
+import { CategoriesSection } from "@/components/store/categories-section";
+import { ProductSection } from "@/components/store/product-section";
+import { PromoSlider } from "@/components/store/promo-slider";
+import { routing } from "@/i18n/routing";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations("home");
+  const nav = await getTranslations("nav");
+
+  const [settings, categories, featured, newArrivals, bestSellers, discounts] =
+    await Promise.all([
+      getStoreSettingsCached(),
+      getCategoriesCached(),
+      getFeaturedProductsCached(),
+      getNewArrivalsCached(),
+      getBestSellersCached(),
+      getActiveDiscountsCached(),
+    ]);
+
+  const banners = Array.isArray(settings?.bannerImages)
+    ? (settings.bannerImages as string[])
+    : [];
+
+  return (
+    <>
+      <HeroSection
+        storeName={settings?.storeName ?? nav("premiumStore")}
+        description={settings?.storeDescription}
+        bannerImages={banners}
+      />
+      {discounts.length > 0 && <PromoSlider banners={[]} discounts={discounts} />}
+      <CategoriesSection categories={categories} />
+      <ProductSection
+        title={t("featuredProducts")}
+        products={featured}
+        discounts={discounts}
+        viewAllHref="/products?featured=true"
+      />
+      <ProductSection
+        title={t("newArrivals")}
+        products={newArrivals}
+        discounts={discounts}
+        viewAllHref="/products?sort=newest"
+      />
+      <ProductSection
+        title={t("bestSellers")}
+        products={bestSellers}
+        discounts={discounts}
+        viewAllHref="/products?sort=popular"
+      />
+    </>
+  );
+}

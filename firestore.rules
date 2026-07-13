@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Public storefront data — anyone can read, only admins (server-side
+    // Admin SDK bypasses this anyway) or authenticated admins can write.
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /discounts/{discountId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /storeSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin-only collections
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      // Storefront creates orders (checkout), only admins can read/manage them.
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}
