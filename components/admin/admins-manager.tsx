@@ -49,7 +49,7 @@ export function AdminsManager({
   const t = useTranslations("admin");
 
   const isCurrentSuperAdmin =
-    admins.find((a) => a.id === currentAdminId)?.is_super_admin ?? false;
+    admins.find((a) => a.id === currentAdminId)?.isSuperAdmin ?? false;
 
   const {
     register,
@@ -131,19 +131,19 @@ export function AdminsManager({
                   {admin.id === currentAdminId && (
                     <Badge variant="secondary">{t("you")}</Badge>
                   )}
-                  {admin.is_super_admin && (
+                  {admin.isSuperAdmin && (
                     <Badge variant="sale">{t("superAdmin")}</Badge>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {t("addedOn")}{" "}
-                  {format(new Date(admin.created_at), "MMM d, yyyy")}
+                  {format(new Date(admin.createdAt), "MMM d, yyyy")}
                 </p>
               </div>
             </div>
             {isCurrentSuperAdmin &&
               admin.id !== currentAdminId &&
-              !admin.is_super_admin &&
+              !admin.isSuperAdmin &&
               admins.length > 1 && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>

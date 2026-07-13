@@ -56,13 +56,13 @@ function ProductFlags({
   product: ProductWithRelations;
   t: ReturnType<typeof useTranslations>;
 }) {
-  if (!product.featured && !product.best_seller && !product.new_arrival)
+  if (!product.featured && !product.bestSeller && !product.newArrival)
     return null;
   return (
     <div className="flex gap-1 flex-wrap">
       {product.featured && <Badge variant="sale">{t("featured")}</Badge>}
-      {product.best_seller && <Badge variant="sale">{t("bestSeller")}</Badge>}
-      {product.new_arrival && <Badge variant="sale">{t("newArrival")}</Badge>}
+      {product.bestSeller && <Badge variant="sale">{t("bestSeller")}</Badge>}
+      {product.bestSeller && <Badge variant="sale">{t("newArrival")}</Badge>}
     </div>
   );
 }
@@ -272,7 +272,7 @@ export function ProductsTable({
                     <td className="p-4 whitespace-nowrap">
                       {formatPrice(product.price)}
                     </td>
-                    <td className="p-4">{product.stock_quantity}</td>
+                    <td className="p-4">{product.stockQuantity}</td>
                     <td className="p-4">
                       <ProductStatusBadge product={product} t={t} />
                     </td>
@@ -320,7 +320,7 @@ export function ProductsTable({
                     {formatPrice(product.price)}
                   </span>
                   <span className="text-muted-foreground">
-                    {t("stock")}: {product.stock_quantity}
+                    {t("stock")}: {product.stockQuantity}
                   </span>
                 </div>
 
