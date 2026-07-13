@@ -29,13 +29,15 @@ const isSuperAdmin = rest.includes("--super");
 
 if (!emailArg || !passwordArg) {
   console.error(
-    "Usage: node --env-file=.env.local scripts/seed-admin.mjs <email> <password> [--super]"
+    "Usage: node --env-file=.env.local scripts/seed-admin.mjs <email> <password> [--super]",
   );
   process.exit(1);
 }
 
 if (passwordArg.length < 6) {
-  console.error("Password must be at least 6 characters (Firebase Auth requirement).");
+  console.error(
+    "Password must be at least 6 characters (Firebase Auth requirement).",
+  );
   process.exit(1);
 }
 
@@ -50,7 +52,7 @@ function getAdminApp() {
   if (!projectId || !clientEmail || !privateKey) {
     console.error(
       "Missing FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY.\n" +
-        "Make sure you're loading .env.local (see the --env-file flag in the usage comment above)."
+        "Make sure you're loading .env.local (see the --env-file flag in the usage comment above).",
     );
     process.exit(1);
   }
@@ -69,8 +71,12 @@ async function main() {
   let userRecord;
   try {
     userRecord = await auth.getUserByEmail(emailArg);
-    console.log(`ℹ️  User already exists in Firebase Auth (uid: ${userRecord.uid}) — updating password.`);
-    userRecord = await auth.updateUser(userRecord.uid, { password: passwordArg });
+    console.log(
+      `ℹ️  User already exists in Firebase Auth (uid: ${userRecord.uid}) — updating password.`,
+    );
+    userRecord = await auth.updateUser(userRecord.uid, {
+      password: passwordArg,
+    });
   } catch (err) {
     if (err.code === "auth/user-not-found") {
       userRecord = await auth.createUser({
@@ -78,7 +84,9 @@ async function main() {
         password: passwordArg,
         emailVerified: true,
       });
-      console.log(`✅ Created new Firebase Auth user (uid: ${userRecord.uid}).`);
+      console.log(
+        `✅ Created new Firebase Auth user (uid: ${userRecord.uid}).`,
+      );
     } else {
       throw err;
     }
@@ -91,10 +99,12 @@ async function main() {
       isSuperAdmin,
       createdAt: new Date().toISOString(),
     },
-    { merge: true }
+    { merge: true },
   );
 
-  console.log(`✅ admins/${userRecord.uid} written in Firestore (isSuperAdmin: ${isSuperAdmin}).`);
+  console.log(
+    `✅ admins/${userRecord.uid} written in Firestore (isSuperAdmin: ${isSuperAdmin}).`,
+  );
   console.log("\nYou can now log in at /admin/login with:");
   console.log(`  email:    ${emailArg}`);
   console.log(`  password: ${passwordArg}`);
