@@ -7,7 +7,9 @@ const intlMiddleware = createMiddleware(routing);
 
 function getLocaleFromPathname(pathname: string): Locale | null {
   const segment = pathname.split("/")[1];
-  return routing.locales.includes(segment as Locale) ? (segment as Locale) : null;
+  return routing.locales.includes(segment as Locale)
+    ? (segment as Locale)
+    : null;
 }
 
 export async function proxy(request: NextRequest) {

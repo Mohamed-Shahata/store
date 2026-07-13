@@ -21,7 +21,7 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
-  const messages = (await import(`../../../messages/${locale}.json`)).default;
+  const messages = (await import(`../../messages/${locale}.json`)).default;
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   return (
