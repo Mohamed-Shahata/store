@@ -71,8 +71,8 @@ export function ProductForm({ categories, product }: ProductFormProps) {
           category_id: product.categoryId ?? undefined,
           images: product.images?.map((img) => img.imageUrl) ?? [],
           featured: product.featured,
-          best_seller: product.best_seller,
-          new_arrival: product.new_arrival,
+          best_seller: product.bestSeller,
+          new_arrival: product.newArrival,
           active: product.active,
           archived: product.archived,
         }
