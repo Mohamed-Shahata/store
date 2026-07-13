@@ -6,7 +6,6 @@ import {
   getRelatedProductsCached,
   getActiveDiscountsCached,
   getStoreSettingsCached,
-  incrementProductViewCount,
 } from "@/lib/data/store-cache";
 import { applyGlobalDiscount } from "@/lib/utils";
 import { ProductDetails } from "@/components/store/product-details";
@@ -64,9 +63,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) {
     notFound();
   }
-
-  // Fire-and-forget: don't block the page render on this.
-  void incrementProductViewCount(slug);
 
   const { finalPrice, badgeText } = applyGlobalDiscount(
     product.price,

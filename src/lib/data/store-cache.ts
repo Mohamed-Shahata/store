@@ -15,40 +15,40 @@ const REVALIDATE_SECONDS = 300;
 export const getStoreSettingsCached = unstable_cache(
   async () => (isFirebaseConfigured() ? products.getStoreSettings() : null),
   ["store-settings"],
-  { tags: [CACHE_TAGS.settings], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.settings], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getCategoriesCached = unstable_cache(
   async () => (isFirebaseConfigured() ? products.getCategories() : []),
   ["categories"],
-  { tags: [CACHE_TAGS.categories], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.categories], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getActiveDiscountsCached = unstable_cache(
   async () => (isFirebaseConfigured() ? products.getActiveDiscounts() : []),
   ["active-discounts"],
-  { tags: [CACHE_TAGS.discounts], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.discounts], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getFeaturedProductsCached = unstable_cache(
   async (limit = 8) =>
     isFirebaseConfigured() ? products.getFeaturedProducts(limit) : [],
   ["featured-products"],
-  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getNewArrivalsCached = unstable_cache(
   async (limit = 8) =>
     isFirebaseConfigured() ? products.getNewArrivals(limit) : [],
   ["new-arrivals"],
-  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getBestSellersCached = unstable_cache(
   async (limit = 8) =>
     isFirebaseConfigured() ? products.getBestSellers(limit) : [],
   ["best-sellers"],
-  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getProductsCached = unstable_cache(
@@ -57,14 +57,14 @@ export const getProductsCached = unstable_cache(
       ? products.getProducts(filters)
       : { products: [], totalCount: 0, totalPages: 0, currentPage: 1 },
   ["products-list"],
-  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getProductBySlugCached = unstable_cache(
   async (slug: string) =>
     isFirebaseConfigured() ? products.getProductBySlug(slug) : null,
   ["product-by-slug"],
-  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS },
 );
 
 export const getRelatedProductsCached = unstable_cache(
@@ -73,14 +73,5 @@ export const getRelatedProductsCached = unstable_cache(
       ? products.getRelatedProducts(productId, categoryId, limit)
       : [],
   ["related-products"],
-  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS }
+  { tags: [CACHE_TAGS.products], revalidate: REVALIDATE_SECONDS },
 );
-
-/**
- * Fire-and-forget view counter. `getProductBySlug` already increments
- * `viewCount` as part of the read, so this is kept only for call-site
- * compatibility and is a no-op elsewhere.
- */
-export async function incrementProductViewCount(): Promise<void> {
-  // No-op: view counting now happens inside getProductBySlug().
-}
