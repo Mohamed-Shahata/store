@@ -9,25 +9,27 @@ import type {
   SortOption,
   StoreSettings,
 } from "@/types/firestore";
+import { serializeFirestoreData } from "../firebase/serialize";
 
 const PRODUCTS_PER_PAGE = 12;
 
-async function attachCategory(
-  product: Product
-): Promise<ProductWithRelations> {
-  if (!product.categoryId) return { ...product, category: null };
+async function attachCategory(product: Product): Promise<ProductWithRelations> {
+  if (!product.categoryId)
+    return serializeFirestoreData({ ...product, category: null });
   const snap = await getAdminDb()
     .collection("categories")
     .doc(product.categoryId)
     .get();
-  return {
+  return serializeFirestoreData({
     ...product,
-    category: snap.exists ? ({ id: snap.id, ...snap.data() } as Category) : null,
-  };
+    category: snap.exists
+      ? ({ id: snap.id, ...snap.data() } as Category)
+      : null,
+  });
 }
 
 async function attachCategories(
-  products: Product[]
+  products: Product[],
 ): Promise<ProductWithRelations[]> {
   return Promise.all(products.map(attachCategory));
 }
@@ -36,7 +38,10 @@ export async function getStoreSettings(): Promise<StoreSettings | null> {
   if (!isFirebaseConfigured()) return null;
   const snap = await getAdminDb().collection("storeSettings").doc("main").get();
   if (!snap.exists) return null;
-  return { id: snap.id, ...snap.data() } as StoreSettings;
+  return serializeFirestoreData({
+    id: snap.id,
+    ...snap.data(),
+  } as StoreSettings);
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -57,7 +62,7 @@ export async function getActiveDiscounts(): Promise<Discount[]> {
 }
 
 export async function getFeaturedProducts(
-  limit = 8
+  limit = 8,
 ): Promise<ProductWithRelations[]> {
   const snap = await getAdminDb()
     .collection("products")
@@ -68,12 +73,12 @@ export async function getFeaturedProducts(
     .limit(limit)
     .get();
   return attachCategories(
-    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product)
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product),
   );
 }
 
 export async function getNewArrivals(
-  limit = 8
+  limit = 8,
 ): Promise<ProductWithRelations[]> {
   const snap = await getAdminDb()
     .collection("products")
@@ -84,12 +89,12 @@ export async function getNewArrivals(
     .limit(limit)
     .get();
   return attachCategories(
-    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product)
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product),
   );
 }
 
 export async function getBestSellers(
-  limit = 8
+  limit = 8,
 ): Promise<ProductWithRelations[]> {
   const snap = await getAdminDb()
     .collection("products")
@@ -100,7 +105,7 @@ export async function getBestSellers(
     .limit(limit)
     .get();
   return attachCategories(
-    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product)
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product),
   );
 }
 
@@ -169,7 +174,7 @@ export async function getProducts(filters: ProductFilters = {}) {
   const pageDocs = pageSnap.docs.slice(from);
 
   const products = await attachCategories(
-    pageDocs.map((d) => ({ id: d.id, ...d.data() }) as Product)
+    pageDocs.map((d) => ({ id: d.id, ...d.data() }) as Product),
   );
 
   return {
@@ -181,7 +186,7 @@ export async function getProducts(filters: ProductFilters = {}) {
 }
 
 export async function getProductBySlug(
-  slug: string
+  slug: string,
 ): Promise<ProductWithRelations | null> {
   const snap = await getAdminDb()
     .collection("products")
@@ -205,7 +210,7 @@ export async function getProductBySlug(
 export async function getRelatedProducts(
   productId: string,
   categoryId: string | null,
-  limit = 4
+  limit = 4,
 ): Promise<ProductWithRelations[]> {
   let query = getAdminDb()
     .collection("products")
@@ -253,7 +258,7 @@ export async function getRecentProducts(limit = 5) {
     .limit(limit)
     .get();
   return attachCategories(
-    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product)
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product),
   );
 }
 
@@ -263,12 +268,15 @@ export async function getAllProductsAdmin() {
     .orderBy("createdAt", "desc")
     .get();
   return attachCategories(
-    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product)
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product),
   );
 }
 
 export async function getAllCategoriesAdmin() {
-  const snap = await getAdminDb().collection("categories").orderBy("name").get();
+  const snap = await getAdminDb()
+    .collection("categories")
+    .orderBy("name")
+    .get();
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Category);
 }
 
