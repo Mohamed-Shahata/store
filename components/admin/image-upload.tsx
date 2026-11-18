@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Upload, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { uploadImage } from "@/lib/cloudinary-client";
+import { uploadImage } from "@/lib/upload-client";
 import { toast } from "sonner";
 
 interface ImageUploadProps {

@@ -23,7 +23,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://*.supabase.co https://picsum.photos https://firebasestorage.googleapis.com https://*.googleusercontent.com https://res.cloudinary.com",
+      "img-src 'self' data: blob: https://*.supabase.co https://picsum.photos https://firebasestorage.googleapis.com https://*.googleusercontent.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebasestorage.googleapis.com https://firebaseinstallations.googleapis.com https://www.googleapis.com https://*.google.com https://*.gstatic.com",
       "frame-src https://*.firebaseapp.com https://*.google.com",
       "frame-ancestors 'none'",
@@ -46,10 +46,6 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com",
-      },
-      {
-        protocol: "https",
-        hostname: "res.cloudinary.com",
       },
     ],
   },

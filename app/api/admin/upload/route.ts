@@ -6,14 +6,18 @@ import {
   requireAdminAuth,
 } from "@/lib/api-security";
 import {
-  deleteFromCloudinary,
-  publicIdFromUrl,
-  uploadToCloudinary,
-  type CloudinaryFolder,
-} from "@/lib/cloudinary";
+  saveUploadedFile,
+  deleteUploadedFile,
+  type UploadFolder,
+} from "@/lib/server-upload";
 
-const ALLOWED_FOLDERS: CloudinaryFolder[] = ["product-images", "store-assets"];
-const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_FOLDERS: UploadFolder[] = [
+  "product-images",
+  "store-assets",
+  "products",
+  "store",
+];
+const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
@@ -32,10 +36,10 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get("file");
   const folderInput = formData.get("folder");
-  const folder: CloudinaryFolder = ALLOWED_FOLDERS.includes(
-    folderInput as CloudinaryFolder,
+  const folder: UploadFolder = ALLOWED_FOLDERS.includes(
+    folderInput as UploadFolder,
   )
-    ? (folderInput as CloudinaryFolder)
+    ? (folderInput as UploadFolder)
     : "product-images";
 
   if (!(file instanceof File)) {
@@ -51,17 +55,17 @@ export async function POST(request: Request) {
 
   if (file.size > MAX_FILE_BYTES) {
     return NextResponse.json(
-      { error: "File too large. Max size is 5MB." },
+      { error: "File too large. Max size is 10MB." },
       { status: 400 },
     );
   }
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const { url, publicId } = await uploadToCloudinary(buffer, folder);
-    return NextResponse.json({ url, publicId });
+    const { url } = await saveUploadedFile(buffer, folder, file.type);
+    return NextResponse.json({ url, publicId: url });
   } catch (err) {
-    console.error("Cloudinary upload error:", err);
+    console.error("Local server upload error:", err);
     return NextResponse.json(
       { error: "Upload failed. Please try again." },
       { status: 500 },
@@ -84,17 +88,11 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "url is required" }, { status: 400 });
   }
 
-  const publicId = publicIdFromUrl(url);
-  if (!publicId) {
-    // Not a Cloudinary URL (e.g. a leftover Firebase Storage URL) — nothing to do.
-    return NextResponse.json({ success: true, skipped: true });
-  }
-
   try {
-    await deleteFromCloudinary(publicId);
-    return NextResponse.json({ success: true });
+    const deleted = await deleteUploadedFile(url);
+    return NextResponse.json({ success: true, deleted });
   } catch (err) {
-    console.error("Cloudinary delete error:", err);
+    console.error("File delete error:", err);
     return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }

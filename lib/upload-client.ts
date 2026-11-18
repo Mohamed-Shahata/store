@@ -1,8 +1,8 @@
-type Folder = "product-images" | "store-assets";
+export type UploadFolder = "product-images" | "store-assets" | "products" | "store";
 
 export async function uploadImage(
   file: File,
-  folder: Folder = "product-images",
+  folder: UploadFolder = "product-images",
 ): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
@@ -18,7 +18,7 @@ export async function uploadImage(
     throw new Error(body.error ?? "Upload failed");
   }
 
-  const data = (await res.json()) as { url: string; publicId: string };
+  const data = (await res.json()) as { url: string; publicId?: string };
   return data.url;
 }
 

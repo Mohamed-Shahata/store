@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+*.rar
 
 # debug
 npm-debug.log*
@@ -39,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# uploads
+/public/uploads/*
+!/public/uploads/products/
+!/public/uploads/products/.gitkeep
+!/public/uploads/store/
+!/public/uploads/store/.gitkeep
