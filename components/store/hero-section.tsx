@@ -16,6 +16,11 @@ interface HeroSectionProps {
   bannerImages?: string[];
 }
 
+const DEFAULT_BANNERS = [
+  "/uploads/store/hero-banner-1.jpg",
+  "/uploads/store/hero-banner-2.jpg",
+];
+
 export function HeroSection({
   storeName,
   description,
@@ -24,7 +29,8 @@ export function HeroSection({
   const t = useTranslations("hero");
   const locale = useLocale();
   const ArrowIcon = ArrowRight;
-  const slides = bannerImages.filter(Boolean);
+  const filtered = bannerImages.filter(Boolean);
+  const slides = filtered.length > 0 ? filtered : DEFAULT_BANNERS;
   const hasSlides = slides.length > 0;
   const [current, setCurrent] = useState(0);
 
