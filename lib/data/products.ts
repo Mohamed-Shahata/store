@@ -50,7 +50,9 @@ export async function getCategories(): Promise<Category[]> {
     .collection("categories")
     .orderBy("name")
     .get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Category);
+  return serializeFirestoreData(
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Category)
+  );
 }
 
 export async function getActiveDiscounts(): Promise<Discount[]> {
@@ -277,7 +279,9 @@ export async function getAllCategoriesAdmin() {
     .collection("categories")
     .orderBy("name")
     .get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Category);
+  return serializeFirestoreData(
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Category)
+  );
 }
 
 export async function getAllDiscountsAdmin() {
@@ -285,7 +289,9 @@ export async function getAllDiscountsAdmin() {
     .collection("discounts")
     .orderBy("createdAt", "desc")
     .get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Discount);
+  return serializeFirestoreData(
+    snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Discount)
+  );
 }
 
 export { PRODUCTS_PER_PAGE };
