@@ -128,6 +128,71 @@ export interface ProductFilters {
  */
 export async function getProducts(filters: ProductFilters = {}) {
   const page = filters.page ?? 1;
+
+  if (filters.search && filters.search.trim()) {
+    const term = filters.search.trim().toLowerCase();
+    let query = getAdminDb()
+      .collection("products")
+      .where("active", "==", true)
+      .where("archived", "==", false) as FirebaseFirestore.Query;
+
+    if (filters.category) {
+      query = query.where("categoryId", "==", filters.category);
+    }
+
+    const snap = await query.get();
+    let allProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Product);
+
+    // Search matches against name, description, and slug
+    allProducts = allProducts.filter((p) => {
+      const name = p.name ? p.name.toLowerCase() : "";
+      const desc = p.description ? p.description.toLowerCase() : "";
+      const slug = p.slug ? p.slug.toLowerCase() : "";
+      return name.includes(term) || desc.includes(term) || slug.includes(term);
+    });
+
+    if (filters.minPrice !== undefined) {
+      allProducts = allProducts.filter((p) => p.price >= filters.minPrice!);
+    }
+    if (filters.maxPrice !== undefined) {
+      allProducts = allProducts.filter((p) => p.price <= filters.maxPrice!);
+    }
+
+    switch (filters.sort) {
+      case "oldest":
+        allProducts.sort((a, b) =>
+          String(a.createdAt || "").localeCompare(String(b.createdAt || ""))
+        );
+        break;
+      case "price_asc":
+        allProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case "price_desc":
+        allProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case "popular":
+        allProducts.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+        break;
+      default:
+        // newest
+        allProducts.sort((a, b) =>
+          String(b.createdAt || "").localeCompare(String(a.createdAt || ""))
+        );
+    }
+
+    const totalCount = allProducts.length;
+    const from = (page - 1) * PRODUCTS_PER_PAGE;
+    const pagedProducts = allProducts.slice(from, from + PRODUCTS_PER_PAGE);
+    const products = await attachCategories(pagedProducts);
+
+    return {
+      products,
+      totalCount,
+      totalPages: Math.ceil(totalCount / PRODUCTS_PER_PAGE),
+      currentPage: page,
+    };
+  }
+
   let query = getAdminDb()
     .collection("products")
     .where("active", "==", true)
@@ -143,29 +208,21 @@ export async function getProducts(filters: ProductFilters = {}) {
     query = query.where("price", "<=", filters.maxPrice);
   }
 
-  if (filters.search) {
-    const term = filters.search;
-    query = query
-      .orderBy("name")
-      .startAt(term)
-      .endAt(term + "\uf8ff");
-  } else {
-    switch (filters.sort) {
-      case "oldest":
-        query = query.orderBy("createdAt", "asc");
-        break;
-      case "price_asc":
-        query = query.orderBy("price", "asc");
-        break;
-      case "price_desc":
-        query = query.orderBy("price", "desc");
-        break;
-      case "popular":
-        query = query.orderBy("viewCount", "desc");
-        break;
-      default:
-        query = query.orderBy("createdAt", "desc");
-    }
+  switch (filters.sort) {
+    case "oldest":
+      query = query.orderBy("createdAt", "asc");
+      break;
+    case "price_asc":
+      query = query.orderBy("price", "asc");
+      break;
+    case "price_desc":
+      query = query.orderBy("price", "desc");
+      break;
+    case "popular":
+      query = query.orderBy("viewCount", "desc");
+      break;
+    default:
+      query = query.orderBy("createdAt", "desc");
   }
 
   const countSnap = await query.count().get();
